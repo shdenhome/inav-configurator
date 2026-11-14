@@ -103,6 +103,7 @@ import MSPCodes from './msp/MSPCodes';
             MSP.send_message(MSPCodes.MSPV2_INAV_STATUS, false, false);
             MSP.send_message(MSPCodes.MSP_ACTIVEBOXES, false, false);
             MSP.send_message(MSPCodes.MSPV2_INAV_ANALOG, false, false);
+            MSP.send_message(MSPCodes.MSPV2_INAV_BATTERY2_STATE, false, false);
             
 
             privateScope.updateView();

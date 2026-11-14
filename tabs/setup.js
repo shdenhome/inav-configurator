@@ -187,6 +187,23 @@ setupTab.initialize = function (callback) {
             rssi_e.text(i18n.getMessage('initialSetupRSSIValue', [((FC.ANALOG.rssi / 1023) * 100).toFixed(0)]));
         }, 100, true);
 
+        interval.add('gui_battery2_update', function () {
+            if (!FC.BATTERY2.state_supported) {
+                $('.battery2-setup-section').prop('hidden', true);
+                return;
+            }
+
+            $('.battery2-setup-section').prop('hidden', false);
+            const fresh = Date.now() - FC.BATTERY2.last_received_timestamp < 3000;
+            const validState = FC.BATTERY2.state >= 0 && FC.BATTERY2.state <= 2;
+            const available = fresh && FC.BATTERY2.present && validState;
+            const stateKey = available ? `battery2State${FC.BATTERY2.state}` : 'battery2Unavailable';
+            $('.battery2-status').text(i18n.getMessage(stateKey));
+            $('.battery2-voltage').text(available ? `${FC.BATTERY2.voltage.toFixed(2)} V` : '—');
+            $('.battery2-current').text(available ? `${FC.BATTERY2.current.toFixed(2)} A` : '—');
+            $('.battery2-drawn').text(available ? `${FC.BATTERY2.drawn_mAh} mAh` : '—');
+        }, 100, true);
+
         function updateArminFailure() {
             var flagNames = FC.getArmingFlags();
             for (var bit in flagNames) {
@@ -387,6 +404,8 @@ setupTab.initialize3D = function () {
 
 setupTab.cleanup = function (callback) {
     $(window).off('resize', this.resize3D);
+    interval.remove('gui_analog_update');
+    interval.remove('gui_battery2_update');
 
     if (callback) callback();
 };

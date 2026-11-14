@@ -475,11 +475,11 @@ test('periodicStatusUpdater.run() sanity check: sends MSP polls when CLI is not 
     periodicStatusUpdater.run();
 
     // This is the "happy path" this whole mechanism exists for: when the CLI
-    // tab is NOT active, the periodic status poll SHOULD queue its 4
+    // tab is NOT active, the periodic status poll SHOULD queue its 5
     // requests. If this test fails, the negative-case test above would be
     // meaningless (it could be "passing" only because run() never sends
     // anything at all).
-    assert.equal(mspQueue.getLength(), 4, 'periodicStatusUpdater.run() should queue its 4 status-poll MSP requests when CLI is not active');
+    assert.equal(mspQueue.getLength(), 5, 'periodicStatusUpdater.run() should queue its 5 status-poll MSP requests when CLI is not active');
 
     mspQueue.flush();
     mspDeduplicationQueue.flush();
