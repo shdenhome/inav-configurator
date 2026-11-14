@@ -846,6 +846,60 @@
     "configurationBatteryScale": {
         "message": "Масштаб напряжения"
     },
+    "battery2Title": {
+        "message": "Вторая батарея"
+    },
+    "battery2Status": {
+        "message": "Состояние датчика"
+    },
+    "battery2Voltage": {
+        "message": "Напряжение"
+    },
+    "battery2Current": {
+        "message": "Ток"
+    },
+    "battery2Drawn": {
+        "message": "Израсходованная ёмкость"
+    },
+    "battery2VoltageScale": {
+        "message": "Масштаб напряжения (1,000 = 1,0)"
+    },
+    "battery2VoltageOffset": {
+        "message": "Смещение напряжения (В)"
+    },
+    "battery2CurrentScale": {
+        "message": "Масштаб тока (1,000 = 1,0)"
+    },
+    "battery2CurrentOffset": {
+        "message": "Смещение тока (А)"
+    },
+    "battery2Cells": {
+        "message": "Количество ячеек (0 = авто)"
+    },
+    "battery2CellDetect": {
+        "message": "Напряжение определения ячеек (В)"
+    },
+    "battery2CellWarning": {
+        "message": "Порог предупреждения на ячейку (В)"
+    },
+    "battery2CellCritical": {
+        "message": "Критический порог на ячейку (В)"
+    },
+    "battery2Unavailable": {
+        "message": "Недоступен"
+    },
+    "battery2State0": {
+        "message": "Норма"
+    },
+    "battery2State1": {
+        "message": "Низкое напряжение"
+    },
+    "battery2State2": {
+        "message": "Критическое напряжение"
+    },
+    "battery2State3": {
+        "message": "Недоступен"
+    },
     "w_xy_gps_v": {
         "message": "Коэффициент доверия GPS для горизонтальной скорости"
     },
@@ -3616,6 +3670,18 @@
     },
     "osdElement_MAIN_BATT_VOLTAGE": {
         "message": "Напряжение батареи"
+    },
+    "osdGroupBattery2": {
+        "message": "Вторая батарея"
+    },
+    "osdElement_BATTERY2_VOLTAGE": {
+        "message": "Напряжение второй батареи"
+    },
+    "osdElement_BATTERY2_CURRENT_DRAW": {
+        "message": "Ток второй батареи"
+    },
+    "osdElement_BATTERY2_MAH_DRAWN": {
+        "message": "Расход ёмкости второй батареи (мА·ч)"
     },
     "BLOCKED_SENSORS_CALIBRATING": {
         "message": "Калибровка во время работы"

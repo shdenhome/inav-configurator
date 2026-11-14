@@ -1519,6 +1519,26 @@ OSD.constants = {
             ]
         },
         {
+            name: 'osdGroupBattery2',
+            items: [
+                {
+                    name: 'BATTERY2_VOLTAGE',
+                    id: 172,
+                    preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('22.2') + FONT.symbol(SYM.VOLT)
+                },
+                {
+                    name: 'BATTERY2_CURRENT_DRAW',
+                    id: 173,
+                    preview: FONT.embed_dot('12.3') + FONT.symbol(SYM.AMP)
+                },
+                {
+                    name: 'BATTERY2_MAH_DRAWN',
+                    id: 174,
+                    preview: osdmAhPrecisionPreview()
+                }
+            ]
+        },
+        {
             name: 'osdGroupCurrentMeter',
             enabled: function() {
                 return FC.isFeatureEnabled('CURRENT_METER');

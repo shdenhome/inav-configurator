@@ -350,6 +350,43 @@ var mspHelper = (function () {
                 //noinspection JSValidateTypes
                 dataHandler.analog_last_received_timestamp = Date.now();
                 break;
+            case MSPCodes.MSPV2_INAV_BATTERY2_STATE:
+                if (data.byteLength === 11) {
+                    FC.BATTERY2.supported = true;
+                    FC.BATTERY2.state_supported = true;
+                    FC.BATTERY2.present = data.getUint8(offset++) !== 0;
+                    FC.BATTERY2.state = data.getUint8(offset++);
+                    FC.BATTERY2.cells = data.getUint8(offset++);
+                    FC.BATTERY2.voltage = data.getUint16(offset, true) / 100;
+                    offset += 2;
+                    FC.BATTERY2.current = data.getInt16(offset, true) / 100;
+                    offset += 2;
+                    FC.BATTERY2.drawn_mAh = data.getUint32(offset, true);
+                    FC.BATTERY2.last_received_timestamp = Date.now();
+                }
+                break;
+            case MSPCodes.MSPV2_INAV_BATTERY2_CONFIG:
+                if (data.byteLength === 15) {
+                    FC.BATTERY2.supported = true;
+                    FC.BATTERY2.config_supported = true;
+                    FC.BATTERY2.config.voltage_scale = data.getUint16(offset, true);
+                    offset += 2;
+                    FC.BATTERY2.config.voltage_offset = data.getInt16(offset, true);
+                    offset += 2;
+                    FC.BATTERY2.config.current_scale = data.getUint16(offset, true);
+                    offset += 2;
+                    FC.BATTERY2.config.current_offset = data.getInt16(offset, true);
+                    offset += 2;
+                    FC.BATTERY2.config.cells = data.getUint8(offset++);
+                    FC.BATTERY2.config.cell_detect = data.getUint16(offset, true);
+                    offset += 2;
+                    FC.BATTERY2.config.cell_warning = data.getUint16(offset, true);
+                    offset += 2;
+                    FC.BATTERY2.config.cell_critical = data.getUint16(offset, true);
+                }
+                break;
+            case MSPCodes.MSPV2_INAV_SET_BATTERY2_CONFIG:
+                break;
             case MSPCodes.MSP_RC_TUNING:
                 FC.RC_tuning.RC_RATE = parseFloat((data.getUint8(offset++) / 100).toFixed(2));
                 FC.RC_tuning.RC_EXPO = parseFloat((data.getUint8(offset++) / 100).toFixed(2));
@@ -2186,6 +2223,25 @@ var mspHelper = (function () {
                     buffer.push(BitHelper.specificByte(FC.BATTERY_CONFIG.capacity_critical, byte_index));
                 buffer.push(FC.BATTERY_CONFIG.capacity_unit);
                 break;
+            case MSPCodes.MSPV2_INAV_SET_BATTERY2_CONFIG: {
+                const config = FC.BATTERY2.config;
+                buffer.push(BitHelper.lowByte(config.voltage_scale));
+                buffer.push(BitHelper.highByte(config.voltage_scale));
+                buffer.push(BitHelper.lowByte(config.voltage_offset));
+                buffer.push(BitHelper.highByte(config.voltage_offset));
+                buffer.push(BitHelper.lowByte(config.current_scale));
+                buffer.push(BitHelper.highByte(config.current_scale));
+                buffer.push(BitHelper.lowByte(config.current_offset));
+                buffer.push(BitHelper.highByte(config.current_offset));
+                buffer.push(config.cells);
+                buffer.push(BitHelper.lowByte(config.cell_detect));
+                buffer.push(BitHelper.highByte(config.cell_detect));
+                buffer.push(BitHelper.lowByte(config.cell_warning));
+                buffer.push(BitHelper.highByte(config.cell_warning));
+                buffer.push(BitHelper.lowByte(config.cell_critical));
+                buffer.push(BitHelper.highByte(config.cell_critical));
+                break;
+            }
 
             case MSPCodes.MSP_SET_RX_CONFIG:
                 buffer.push(FC.RX_CONFIG.serialrx_provider);
@@ -3346,6 +3402,14 @@ var mspHelper = (function () {
         MSP.send_message(MSPCodes.MSPV2_BATTERY_CONFIG, false, false, callback);
     };
 
+    self.loadBattery2State = function (callback) {
+        MSP.send_message(MSPCodes.MSPV2_INAV_BATTERY2_STATE, false, false, callback);
+    };
+
+    self.loadBattery2Config = function (callback) {
+        MSP.send_message(MSPCodes.MSPV2_INAV_BATTERY2_CONFIG, false, false, callback);
+    };
+
     self.loadRxConfig = function (callback) {
         MSP.send_message(MSPCodes.MSP_RX_CONFIG, false, false, callback);
     };
@@ -3432,6 +3496,10 @@ var mspHelper = (function () {
 
     self.saveBatteryConfig = function (callback) {
         MSP.send_message(MSPCodes.MSPV2_SET_BATTERY_CONFIG, mspHelper.crunch(MSPCodes.MSPV2_SET_BATTERY_CONFIG), false, callback);
+    };
+
+    self.saveBattery2Config = function (callback) {
+        MSP.send_message(MSPCodes.MSPV2_INAV_SET_BATTERY2_CONFIG, mspHelper.crunch(MSPCodes.MSPV2_INAV_SET_BATTERY2_CONFIG), false, callback);
     };
 
     self.save3dConfig = function (callback) {

@@ -91,7 +91,32 @@ const realMspUrl = rewriteAndWrite('js/msp.js', [
 // is only referenced from switch cases these tests never reach, so those
 // imports just have to resolve.
 const FC_STATE_ID = '__mspParseFailureFcState';
-globalThis[FC_STATE_ID] = { PIDs: [], FC_CONFIG: undefined };
+globalThis[FC_STATE_ID] = {
+    PIDs: [],
+    FC_CONFIG: undefined,
+    BATTERY2: {
+        supported: false,
+        state_supported: false,
+        config_supported: false,
+        present: false,
+        state: 3,
+        cells: 0,
+        voltage: 0,
+        current: 0,
+        drawn_mAh: 0,
+        last_received_timestamp: 0,
+        config: {
+            voltage_scale: 1000,
+            voltage_offset: 0,
+            current_scale: 1000,
+            current_offset: 0,
+            cells: 0,
+            cell_detect: 0,
+            cell_warning: 0,
+            cell_critical: 0
+        }
+    }
+};
 
 const fcStubUrl = dataModule(`
     const FC = globalThis['${FC_STATE_ID}'];
@@ -218,6 +243,60 @@ test('MSP2_PID positive control: a matching bank count parses unchanged', () => 
 
     assert.equal(FC.PIDs.length, 11, 'a matching FC must not change the bank count');
     assert.deepEqual(FC.PIDs[10], [41, 42, 43, 44]);
+    assert.notEqual(response, null);
+});
+
+test('BATTERY2_STATE (0x20A0) parses independent readings and marks the command supported', () => {
+    const payload = [1, 1, 6, 0xAE, 0x08, 0x2E, 0xFB, 0xCA, 0xA8, 0x00, 0x00];
+    let response = null;
+    const handler = makeDataHandler(MSPCodes.MSPV2_INAV_BATTERY2_STATE, payload, (resp) => { response = resp; });
+
+    mspHelper.handleResponse(handler);
+
+    assert.equal(FC.BATTERY2.supported, true);
+    assert.equal(FC.BATTERY2.state_supported, true);
+    assert.equal(FC.BATTERY2.present, true);
+    assert.equal(FC.BATTERY2.state, 1);
+    assert.equal(FC.BATTERY2.cells, 6);
+    assert.equal(FC.BATTERY2.voltage, 22.22);
+    assert.equal(FC.BATTERY2.current, -12.34);
+    assert.equal(FC.BATTERY2.drawn_mAh, 43210);
+    assert.notEqual(response, null);
+});
+
+test('BATTERY2_CONFIG (0x20A1/0x20A2) reads signed offsets and SET payload uses the agreed byte layout', () => {
+    const payload = [0xE9, 0x03, 0xF4, 0xFF, 0xD4, 0x03, 0x22, 0x00, 6, 0xA4, 0x01, 0x5E, 0x01, 0x4A, 0x01];
+    let response = null;
+    const handler = makeDataHandler(MSPCodes.MSPV2_INAV_BATTERY2_CONFIG, payload, (resp) => { response = resp; });
+
+    mspHelper.handleResponse(handler);
+
+    assert.equal(FC.BATTERY2.supported, true);
+    assert.equal(FC.BATTERY2.config_supported, true);
+    assert.deepEqual(FC.BATTERY2.config, {
+        voltage_scale: 1001,
+        voltage_offset: -12,
+        current_scale: 980,
+        current_offset: 34,
+        cells: 6,
+        cell_detect: 420,
+        cell_warning: 350,
+        cell_critical: 330
+    });
+    assert.notEqual(response, null);
+
+    assert.deepEqual(Array.from(new Uint8Array(mspHelper.crunch(MSPCodes.MSPV2_INAV_SET_BATTERY2_CONFIG))), payload);
+});
+
+test('an old firmware empty BATTERY2 response stays unsupported and completes cleanly', () => {
+    FC.BATTERY2.supported = false;
+    FC.BATTERY2.state_supported = false;
+    let response = null;
+    const handler = makeDataHandler(MSPCodes.MSPV2_INAV_BATTERY2_STATE, [], (resp) => { response = resp; });
+
+    assert.doesNotThrow(() => mspHelper.handleResponse(handler));
+    assert.equal(FC.BATTERY2.supported, false);
+    assert.equal(FC.BATTERY2.state_supported, false);
     assert.notEqual(response, null);
 });
 

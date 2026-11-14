@@ -440,6 +440,29 @@ var FC = {
             capacity_unit: 0
         };
 
+        this.BATTERY2 = {
+            supported: false,
+            state_supported: false,
+            config_supported: false,
+            present: false,
+            state: 3,
+            cells: 0,
+            voltage: 0,
+            current: 0,
+            drawn_mAh: 0,
+            last_received_timestamp: 0,
+            config: {
+                voltage_scale: 1000,
+                voltage_offset: 0,
+                current_scale: 1000,
+                current_offset: 0,
+                cells: 0,
+                cell_detect: 0,
+                cell_warning: 0,
+                cell_critical: 0
+            }
+        };
+
         this.VTX_CONFIG = {
             device_type: VTX.DEV_UNKNOWN,
             band: 0,

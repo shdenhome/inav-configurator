@@ -82,7 +82,8 @@ configurationTab.initialize = function (callback, scrollPosition) {
         mspHelper.loadBoardAlignment,
         mspHelper.loadCurrentMeterConfig,
         mspHelper.loadMiscV2,
-        mspHelper.loadSerialPorts
+        mspHelper.loadSerialPorts,
+        mspHelper.loadBattery2Config
     ];
 
     loadChainer.setChain(loadChain);
@@ -97,12 +98,32 @@ configurationTab.initialize = function (callback, scrollPosition) {
         mspHelper.saveVTXConfig,
         mspHelper.saveCurrentMeterConfig,
         mspHelper.saveMiscV2,
+        saveBattery2Config,
         saveSettings,
         mspHelper.saveToEeprom
     ];
 
     function saveSettings(onComplete) {
         Settings.saveInputs(onComplete);
+    }
+
+    function saveBattery2Config(onComplete) {
+        if (!FC.BATTERY2.config_supported) {
+            onComplete();
+            return;
+        }
+
+        const config = FC.BATTERY2.config;
+        config.voltage_scale = Math.round(parseFloat($('#battery2-voltage-scale').val()) * 1000);
+        config.voltage_offset = Math.round(parseFloat($('#battery2-voltage-offset').val()) * 100);
+        config.current_scale = Math.round(parseFloat($('#battery2-current-scale').val()) * 1000);
+        config.current_offset = Math.round(parseFloat($('#battery2-current-offset').val()) * 100);
+        config.cells = parseInt($('#battery2-cells').val(), 10);
+        config.cell_detect = Math.round(parseFloat($('#battery2-cell-detect').val()) * 100);
+        config.cell_warning = Math.round(parseFloat($('#battery2-cell-warning').val()) * 100);
+        config.cell_critical = Math.round(parseFloat($('#battery2-cell-critical').val()) * 100);
+
+        mspHelper.saveBattery2Config(onComplete);
     }
 
     saveChainer.setChain(saveChain);
@@ -274,6 +295,19 @@ configurationTab.initialize = function (callback, scrollPosition) {
         $('#currentscale').val(FC.CURRENT_METER_CONFIG.scale);
         $('#currentoffset').val(FC.CURRENT_METER_CONFIG.offset / 10);
 
+        if (FC.BATTERY2.config_supported) {
+            $('.battery2-section').prop('hidden', false);
+            const config = FC.BATTERY2.config;
+            $('#battery2-voltage-scale').val((config.voltage_scale / 1000).toFixed(3));
+            $('#battery2-voltage-offset').val((config.voltage_offset / 100).toFixed(2));
+            $('#battery2-current-scale').val((config.current_scale / 1000).toFixed(3));
+            $('#battery2-current-offset').val((config.current_offset / 100).toFixed(2));
+            $('#battery2-cells').val(config.cells);
+            $('#battery2-cell-detect').val((config.cell_detect / 100).toFixed(2));
+            $('#battery2-cell-warning').val((config.cell_warning / 100).toFixed(2));
+            $('#battery2-cell-critical').val((config.cell_critical / 100).toFixed(2));
+        }
+
         // fill battery capacity
         $('#battery_capacity').val(FC.MISC.battery_capacity);
         let batCapWarn = Math.round(FC.MISC.battery_capacity_warning * 100 / FC.MISC.battery_capacity);
@@ -354,11 +388,28 @@ configurationTab.initialize = function (callback, scrollPosition) {
             $('#batterycurrent').val([FC.ANALOG.amperage.toFixed(2)]);
         }, 100, true); // 10 fps
 
+        interval.add('config_load_battery2', function () {
+            if (!FC.BATTERY2.state_supported) {
+                $('#battery2-status').val(i18n.getMessage('battery2Unavailable'));
+                $('#battery2-voltage, #battery2-current, #battery2-drawn').val('—');
+                return;
+            }
+            const fresh = Date.now() - FC.BATTERY2.last_received_timestamp < 3000;
+            const validState = FC.BATTERY2.state >= 0 && FC.BATTERY2.state <= 2;
+            const available = fresh && FC.BATTERY2.present && validState;
+            $('#battery2-status').val(i18n.getMessage(available ? `battery2State${FC.BATTERY2.state}` : 'battery2Unavailable'));
+            $('#battery2-voltage').val(available ? `${FC.BATTERY2.voltage.toFixed(2)} V` : '—');
+            $('#battery2-current').val(available ? `${FC.BATTERY2.current.toFixed(2)} A` : '—');
+            $('#battery2-drawn').val(available ? `${FC.BATTERY2.drawn_mAh} mAh` : '—');
+        }, 100, true);
+
         GUI.content_ready(callback);
     }
 };
 
 configurationTab.cleanup = function (callback) {
+    interval.remove('config_load_analog');
+    interval.remove('config_load_battery2');
     if (callback) callback();
 };
 

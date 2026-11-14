@@ -1302,6 +1302,60 @@
     "configurationBatteryCapacityUnit": {
         "message": "Battery Capacity Unit"
     },
+    "battery2Title": {
+        "message": "Second Battery"
+    },
+    "battery2Status": {
+        "message": "Sensor status"
+    },
+    "battery2Voltage": {
+        "message": "Voltage"
+    },
+    "battery2Current": {
+        "message": "Current"
+    },
+    "battery2Drawn": {
+        "message": "Capacity drawn"
+    },
+    "battery2VoltageScale": {
+        "message": "Voltage scale (1.000 = 1.0)"
+    },
+    "battery2VoltageOffset": {
+        "message": "Voltage offset (V)"
+    },
+    "battery2CurrentScale": {
+        "message": "Current scale (1.000 = 1.0)"
+    },
+    "battery2CurrentOffset": {
+        "message": "Current offset (A)"
+    },
+    "battery2Cells": {
+        "message": "Number of cells (0 = auto)"
+    },
+    "battery2CellDetect": {
+        "message": "Cell detection voltage (V)"
+    },
+    "battery2CellWarning": {
+        "message": "Warning cell voltage (V)"
+    },
+    "battery2CellCritical": {
+        "message": "Critical cell voltage (V)"
+    },
+    "battery2Unavailable": {
+        "message": "Unavailable"
+    },
+    "battery2State0": {
+        "message": "OK"
+    },
+    "battery2State1": {
+        "message": "Low voltage warning"
+    },
+    "battery2State2": {
+        "message": "Critical voltage"
+    },
+    "battery2State3": {
+        "message": "Unavailable"
+    },
     "configurationPowerLimits": {
         "message": "Power Limiting"
     },
@@ -4739,6 +4793,18 @@
     },
     "osdElement_MAIN_BATT_VOLTAGE": {
         "message": "Battery Voltage"
+    },
+    "osdGroupBattery2": {
+        "message": "Second Battery"
+    },
+    "osdElement_BATTERY2_VOLTAGE": {
+        "message": "Second Battery Voltage"
+    },
+    "osdElement_BATTERY2_CURRENT_DRAW": {
+        "message": "Second Battery Current Draw"
+    },
+    "osdElement_BATTERY2_MAH_DRAWN": {
+        "message": "Second Battery mAh Drawn"
     },
     "osdElement_SAG_COMP_MAIN_BATT_VOLTAGE": {
         "message": "Sag-compensated Battery Voltage"
