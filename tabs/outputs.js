@@ -714,7 +714,9 @@ outputsTab.initialize = function (callback) {
 
         let $rmsHelper = $(".acc-rms"),
             $currentHelper = $(".current-current"),
-            $voltageHelper = $(".current-voltage");
+            $voltageHelper = $(".current-voltage"),
+            $battery2CurrentHelper = $(".output-battery2-current"),
+            $battery2VoltageHelper = $(".output-battery2-voltage");
 
         // timer initialization
         interval.killAll(['motor_and_status_pull', 'global_data_refresh', 'msp-load-update', 'ltm-connection-check']);
@@ -726,6 +728,14 @@ outputsTab.initialize = function (callback) {
         interval.add('ANALOG_pull', function () {
             $currentHelper.html(FC.ANALOG.amperage.toFixed(2));
             $voltageHelper.html(FC.ANALOG.voltage.toFixed(2));
+            const battery2Fresh = Date.now() - FC.BATTERY2.last_received_timestamp < 3000;
+            if (FC.BATTERY2.present && battery2Fresh) {
+                $battery2CurrentHelper.text(FC.BATTERY2.current.toFixed(2));
+                $battery2VoltageHelper.text(FC.BATTERY2.voltage.toFixed(2));
+            } else {
+                $battery2CurrentHelper.text('—');
+                $battery2VoltageHelper.text('—');
+            }
         }, 100, true);
 
         function update_accel_graph() {

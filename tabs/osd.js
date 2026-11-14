@@ -1527,6 +1527,11 @@ OSD.constants = {
                     preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('22.2') + FONT.symbol(SYM.VOLT)
                 },
                 {
+                    name: 'BATTERY2_CELL_VOLTAGE',
+                    id: 175,
+                    preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('3.70') + FONT.symbol(SYM.VOLT)
+                },
+                {
                     name: 'BATTERY2_CURRENT_DRAW',
                     id: 173,
                     preview: FONT.embed_dot('12.3') + FONT.symbol(SYM.AMP)

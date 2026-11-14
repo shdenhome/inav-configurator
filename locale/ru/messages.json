@@ -3013,6 +3013,12 @@
     "outputStatsTableVoltage": {
         "message": "Напряжение [В]"
     },
+    "outputStatsTableBattery2Current": {
+        "message": "Ток второй батареи [А]"
+    },
+    "outputStatsTableBattery2Voltage": {
+        "message": "Напряжение второй батареи [В]"
+    },
     "pidTuning_gyro_main_lpf_hz": {
         "message": "Частота среза основного гирофильтра"
     },
@@ -3676,6 +3682,9 @@
     },
     "osdElement_BATTERY2_VOLTAGE": {
         "message": "Напряжение второй батареи"
+    },
+    "osdElement_BATTERY2_CELL_VOLTAGE": {
+        "message": "Напряжение ячейки второй батареи"
     },
     "osdElement_BATTERY2_CURRENT_DRAW": {
         "message": "Ток второй батареи"

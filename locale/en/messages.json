@@ -4800,6 +4800,9 @@
     "osdElement_BATTERY2_VOLTAGE": {
         "message": "Second Battery Voltage"
     },
+    "osdElement_BATTERY2_CELL_VOLTAGE": {
+        "message": "Second Battery Cell Voltage"
+    },
     "osdElement_BATTERY2_CURRENT_DRAW": {
         "message": "Second Battery Current Draw"
     },
@@ -6971,6 +6974,12 @@
     },
     "outputStatsTableVoltage": {
         "message": "Voltage [V]"
+    },
+    "outputStatsTableBattery2Current": {
+        "message": "Second Battery Current [A]"
+    },
+    "outputStatsTableBattery2Voltage": {
+        "message": "Second Battery Voltage [V]"
     },
     "LogicConditions": {
         "message": "Logic Conditions"
