@@ -886,16 +886,16 @@
         "message": "ID батареи CAN"
     },
     "battery2VoltageScale": {
-        "message": "Масштаб напряжения (1,000 = 1,0)"
+        "message": "Масштаб напряжения"
     },
     "battery2VoltageOffset": {
         "message": "Смещение напряжения (В)"
     },
     "battery2CurrentScale": {
-        "message": "Масштаб тока (мВ/А)"
+        "message": "Масштаб амперметра"
     },
     "battery2CurrentOffset": {
-        "message": "Смещение тока (мВ)"
+        "message": "Смещение в милливольтных шагах"
     },
     "battery2Cells": {
         "message": "Количество ячеек (0 = авто)"

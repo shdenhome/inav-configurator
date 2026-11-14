@@ -1342,16 +1342,16 @@
         "message": "CAN battery ID"
     },
     "battery2VoltageScale": {
-        "message": "Voltage scale (1.000 = 1.0)"
+        "message": "Voltage Scale"
     },
     "battery2VoltageOffset": {
         "message": "Voltage offset (V)"
     },
     "battery2CurrentScale": {
-        "message": "Current scale (mV/A)"
+        "message": "Current Meter Scale"
     },
     "battery2CurrentOffset": {
-        "message": "Current offset (mV)"
+        "message": "Offset in millivolt steps"
     },
     "battery2Cells": {
         "message": "Number of cells (0 = auto)"

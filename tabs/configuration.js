@@ -137,9 +137,9 @@ configurationTab.initialize = function (callback, scrollPosition) {
         }
 
         const config = FC.BATTERY2.config;
-        config.voltage_scale = Math.round(parseFloat($('#battery2-voltage-scale').val()) * 1000);
+        config.voltage_scale = Math.round(parseFloat($('#battery2-voltage-scale').val()));
         config.voltage_offset = Math.round(parseFloat($('#battery2-voltage-offset').val()) * 100);
-        config.current_scale = Math.round(parseFloat($('#battery2-current-scale').val()) * 10);
+        config.current_scale = Math.round(parseFloat($('#battery2-current-scale').val()));
         config.current_offset = Math.round(parseFloat($('#battery2-current-offset').val()));
         config.voltage_enabled = $('#battery2-voltage-enabled').prop('checked') ? 1 : 0;
         config.voltage_sensor = parseInt($('#battery2-voltage-sensor').val(), 10);
@@ -326,9 +326,9 @@ configurationTab.initialize = function (callback, scrollPosition) {
         if (FC.BATTERY2.config_supported) {
             $('.battery2-section').prop('hidden', false);
             const config = FC.BATTERY2.config;
-            $('#battery2-voltage-scale').val((config.voltage_scale / 1000).toFixed(3));
+            $('#battery2-voltage-scale').val(config.voltage_scale);
             $('#battery2-voltage-offset').val((config.voltage_offset / 100).toFixed(2));
-            $('#battery2-current-scale').val((config.current_scale / 10).toFixed(1));
+            $('#battery2-current-scale').val(config.current_scale);
             $('#battery2-current-offset').val(config.current_offset);
             $('#battery2-voltage-enabled').prop('checked', config.voltage_enabled !== 0);
             $('#battery2-voltage-sensor').val(config.voltage_sensor);
