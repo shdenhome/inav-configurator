@@ -861,6 +861,30 @@
     "battery2Drawn": {
         "message": "Израсходованная ёмкость"
     },
+    "configurationIna226SensorLabel": {
+        "message": "I2C (INA226)"
+    },
+    "battery2VoltageEnabled": {
+        "message": "Контроль напряжения второй батареи"
+    },
+    "battery2VoltageSensor": {
+        "message": "Тип датчика напряжения"
+    },
+    "battery2CurrentEnabled": {
+        "message": "Мониторинг тока второй батареи"
+    },
+    "battery2CurrentSensor": {
+        "message": "Тип датчика тока"
+    },
+    "battery2SensorI2c": {
+        "message": "I2C (Matek INA228/INA238)"
+    },
+    "battery2SensorCan": {
+        "message": "CAN"
+    },
+    "battery2CanId": {
+        "message": "ID батареи CAN"
+    },
     "battery2VoltageScale": {
         "message": "Масштаб напряжения (1,000 = 1,0)"
     },
@@ -868,10 +892,10 @@
         "message": "Смещение напряжения (В)"
     },
     "battery2CurrentScale": {
-        "message": "Масштаб тока (1,000 = 1,0)"
+        "message": "Масштаб тока (мВ/А)"
     },
     "battery2CurrentOffset": {
-        "message": "Смещение тока (А)"
+        "message": "Смещение тока (мВ)"
     },
     "battery2Cells": {
         "message": "Количество ячеек (0 = авто)"

@@ -240,6 +240,32 @@
                         <label for="battery2-drawn"><span data-i18n="battery2Drawn"></span></label>
                     </div>
                     <div class="number">
+                        <input type="checkbox" id="battery2-voltage-enabled" class="toggle" />
+                        <label for="battery2-voltage-enabled"><span data-i18n="battery2VoltageEnabled"></span></label>
+                    </div>
+                    <div class="select">
+                        <select id="battery2-voltage-sensor">
+                            <option value="0" data-i18n="battery2SensorI2c">I2C</option>
+                            <option value="1" data-i18n="battery2SensorCan">CAN</option>
+                        </select>
+                        <label for="battery2-voltage-sensor"><span data-i18n="battery2VoltageSensor"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="checkbox" id="battery2-current-enabled" class="toggle" />
+                        <label for="battery2-current-enabled"><span data-i18n="battery2CurrentEnabled"></span></label>
+                    </div>
+                    <div class="select">
+                        <select id="battery2-current-sensor">
+                            <option value="0" data-i18n="battery2SensorI2c">I2C</option>
+                            <option value="1" data-i18n="battery2SensorCan">CAN</option>
+                        </select>
+                        <label for="battery2-current-sensor"><span data-i18n="battery2CurrentSensor"></span></label>
+                    </div>
+                    <div class="number battery2-can-id-setting">
+                        <input type="number" id="battery2-can-id" step="1" min="0" max="255" />
+                        <label for="battery2-can-id"><span data-i18n="battery2CanId"></span></label>
+                    </div>
+                    <div class="number">
                         <input type="number" id="battery2-voltage-scale" step="0.001" min="0.001" max="65.535" />
                         <label for="battery2-voltage-scale"><span data-i18n="battery2VoltageScale"></span></label>
                     </div>
@@ -248,11 +274,11 @@
                         <label for="battery2-voltage-offset"><span data-i18n="battery2VoltageOffset"></span></label>
                     </div>
                     <div class="number">
-                        <input type="number" id="battery2-current-scale" step="0.001" min="0.001" max="65.535" />
+                        <input type="number" id="battery2-current-scale" step="0.1" min="0.1" max="6553.5" />
                         <label for="battery2-current-scale"><span data-i18n="battery2CurrentScale"></span></label>
                     </div>
                     <div class="number">
-                        <input type="number" id="battery2-current-offset" step="0.01" min="-327.68" max="327.67" />
+                        <input type="number" id="battery2-current-offset" step="1" min="-32768" max="32767" />
                         <label for="battery2-current-offset"><span data-i18n="battery2CurrentOffset"></span></label>
                     </div>
                     <div class="number">

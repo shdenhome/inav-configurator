@@ -21,7 +21,18 @@ function isIna226Selected($meterType) {
     return settingInfo?.table?.values?.[selectedValue] === 'INA226';
 }
 
+function labelIna226Option($meterType) {
+    const values = $meterType.data('setting-info')?.table?.values || [];
+    $meterType.find('option').each(function (index) {
+        if (values[index] === 'INA226') {
+            $(this).text(i18n.getMessage('configurationIna226SensorLabel'));
+        }
+    });
+}
+
 function updateIna226SettingsVisibility() {
+    labelIna226Option($('#vbat_meter_type'));
+    labelIna226Option($('#current_meter_type'));
     const usesIna226Voltage = isIna226Selected($('#vbat_meter_type'));
     const usesIna226Current = isIna226Selected($('#current_meter_type'));
 
@@ -29,6 +40,18 @@ function updateIna226SettingsVisibility() {
     $('.ina226-current-setting').prop('hidden', !usesIna226Current);
     $('.adc-voltage-setting').toggle(!usesIna226Voltage);
     $('.adc-current-setting').toggle(!usesIna226Current);
+}
+
+function updateBattery2SettingsVisibility() {
+    const usesCan = ($('#battery2-voltage-enabled').prop('checked') && $('#battery2-voltage-sensor').val() === '1')
+        || ($('#battery2-current-enabled').prop('checked') && $('#battery2-current-sensor').val() === '1');
+    $('.battery2-can-id-setting').prop('hidden', !usesCan);
+    $('#battery2-voltage-sensor').prop('disabled', !$('#battery2-voltage-enabled').prop('checked'));
+    $('#battery2-current-sensor').prop('disabled', !$('#battery2-current-enabled').prop('checked'));
+    $('#battery2-voltage-scale, #battery2-voltage-offset').prop('disabled', !$('#battery2-voltage-enabled').prop('checked'));
+    const usesI2cCurrent = $('#battery2-current-enabled').prop('checked') && $('#battery2-current-sensor').val() === '0';
+    $('#battery2-current-scale, #battery2-current-offset').prop('disabled', !usesI2cCurrent);
+    $('#battery2-voltage-scale, #battery2-voltage-offset').prop('disabled', !$('#battery2-voltage-enabled').prop('checked') || $('#battery2-voltage-sensor').val() === '1');
 }
 
 function updateMztcSettingsVisibility() {
@@ -116,8 +139,13 @@ configurationTab.initialize = function (callback, scrollPosition) {
         const config = FC.BATTERY2.config;
         config.voltage_scale = Math.round(parseFloat($('#battery2-voltage-scale').val()) * 1000);
         config.voltage_offset = Math.round(parseFloat($('#battery2-voltage-offset').val()) * 100);
-        config.current_scale = Math.round(parseFloat($('#battery2-current-scale').val()) * 1000);
-        config.current_offset = Math.round(parseFloat($('#battery2-current-offset').val()) * 100);
+        config.current_scale = Math.round(parseFloat($('#battery2-current-scale').val()) * 10);
+        config.current_offset = Math.round(parseFloat($('#battery2-current-offset').val()));
+        config.voltage_enabled = $('#battery2-voltage-enabled').prop('checked') ? 1 : 0;
+        config.voltage_sensor = parseInt($('#battery2-voltage-sensor').val(), 10);
+        config.current_enabled = $('#battery2-current-enabled').prop('checked') ? 1 : 0;
+        config.current_sensor = parseInt($('#battery2-current-sensor').val(), 10);
+        config.can_battery_id = parseInt($('#battery2-can-id').val(), 10);
         config.cells = parseInt($('#battery2-cells').val(), 10);
         config.cell_detect = Math.round(parseFloat($('#battery2-cell-detect').val()) * 100);
         config.cell_warning = Math.round(parseFloat($('#battery2-cell-warning').val()) * 100);
@@ -300,12 +328,19 @@ configurationTab.initialize = function (callback, scrollPosition) {
             const config = FC.BATTERY2.config;
             $('#battery2-voltage-scale').val((config.voltage_scale / 1000).toFixed(3));
             $('#battery2-voltage-offset').val((config.voltage_offset / 100).toFixed(2));
-            $('#battery2-current-scale').val((config.current_scale / 1000).toFixed(3));
-            $('#battery2-current-offset').val((config.current_offset / 100).toFixed(2));
+            $('#battery2-current-scale').val((config.current_scale / 10).toFixed(1));
+            $('#battery2-current-offset').val(config.current_offset);
+            $('#battery2-voltage-enabled').prop('checked', config.voltage_enabled !== 0);
+            $('#battery2-voltage-sensor').val(config.voltage_sensor);
+            $('#battery2-current-enabled').prop('checked', config.current_enabled !== 0);
+            $('#battery2-current-sensor').val(config.current_sensor);
+            $('#battery2-can-id').val(config.can_battery_id);
             $('#battery2-cells').val(config.cells);
             $('#battery2-cell-detect').val((config.cell_detect / 100).toFixed(2));
             $('#battery2-cell-warning').val((config.cell_warning / 100).toFixed(2));
             $('#battery2-cell-critical').val((config.cell_critical / 100).toFixed(2));
+            $('#battery2-voltage-enabled, #battery2-voltage-sensor, #battery2-current-enabled, #battery2-current-sensor').on('change', updateBattery2SettingsVisibility);
+            updateBattery2SettingsVisibility();
         }
 
         // fill battery capacity

@@ -1266,6 +1266,9 @@
     "configurationIna226I2cBus": {
         "message": "INA226 I2C Bus"
     },
+    "configurationIna226SensorLabel": {
+        "message": "I2C (INA226)"
+    },
     "configurationIna226I2cBusHelp": {
         "message": "Hardware I2C bus connected to the INA226."
     },
@@ -1317,6 +1320,27 @@
     "battery2Drawn": {
         "message": "Capacity drawn"
     },
+    "battery2VoltageEnabled": {
+        "message": "Monitor second battery voltage"
+    },
+    "battery2VoltageSensor": {
+        "message": "Voltage sensor type"
+    },
+    "battery2CurrentEnabled": {
+        "message": "Monitor second battery current"
+    },
+    "battery2CurrentSensor": {
+        "message": "Current sensor type"
+    },
+    "battery2SensorI2c": {
+        "message": "I2C (Matek INA228/INA238)"
+    },
+    "battery2SensorCan": {
+        "message": "CAN"
+    },
+    "battery2CanId": {
+        "message": "CAN battery ID"
+    },
     "battery2VoltageScale": {
         "message": "Voltage scale (1.000 = 1.0)"
     },
@@ -1324,10 +1348,10 @@
         "message": "Voltage offset (V)"
     },
     "battery2CurrentScale": {
-        "message": "Current scale (1.000 = 1.0)"
+        "message": "Current scale (mV/A)"
     },
     "battery2CurrentOffset": {
-        "message": "Current offset (A)"
+        "message": "Current offset (mV)"
     },
     "battery2Cells": {
         "message": "Number of cells (0 = auto)"

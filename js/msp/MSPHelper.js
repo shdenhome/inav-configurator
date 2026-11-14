@@ -366,7 +366,7 @@ var mspHelper = (function () {
                 }
                 break;
             case MSPCodes.MSPV2_INAV_BATTERY2_CONFIG:
-                if (data.byteLength === 15) {
+                if (data.byteLength === 15 || data.byteLength === 20) {
                     FC.BATTERY2.supported = true;
                     FC.BATTERY2.config_supported = true;
                     FC.BATTERY2.config.voltage_scale = data.getUint16(offset, true);
@@ -383,6 +383,14 @@ var mspHelper = (function () {
                     FC.BATTERY2.config.cell_warning = data.getUint16(offset, true);
                     offset += 2;
                     FC.BATTERY2.config.cell_critical = data.getUint16(offset, true);
+                    offset += 2;
+                    if (data.byteLength === 20) {
+                        FC.BATTERY2.config.voltage_enabled = data.getUint8(offset++);
+                        FC.BATTERY2.config.voltage_sensor = data.getUint8(offset++);
+                        FC.BATTERY2.config.current_enabled = data.getUint8(offset++);
+                        FC.BATTERY2.config.current_sensor = data.getUint8(offset++);
+                        FC.BATTERY2.config.can_battery_id = data.getUint8(offset++);
+                    }
                 }
                 break;
             case MSPCodes.MSPV2_INAV_SET_BATTERY2_CONFIG:
@@ -2240,6 +2248,11 @@ var mspHelper = (function () {
                 buffer.push(BitHelper.highByte(config.cell_warning));
                 buffer.push(BitHelper.lowByte(config.cell_critical));
                 buffer.push(BitHelper.highByte(config.cell_critical));
+                buffer.push(config.voltage_enabled);
+                buffer.push(config.voltage_sensor);
+                buffer.push(config.current_enabled);
+                buffer.push(config.current_sensor);
+                buffer.push(config.can_battery_id);
                 break;
             }
 
