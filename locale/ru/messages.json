@@ -894,6 +894,12 @@
     "battery2CanId": {
         "message": "ID батареи CAN"
     },
+    "battery2CurrentI2cAddress": {
+        "message": "I2C-адрес датчика"
+    },
+    "battery2CurrentI2cAddressHelp": {
+        "message": "Введите 7-битный I2C-адрес десятичным числом. 69 — это 0x45."
+    },
     "battery2VoltageScale": {
         "message": "Масштаб напряжения"
     },

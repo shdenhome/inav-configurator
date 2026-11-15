@@ -265,7 +265,7 @@ test('BATTERY2_STATE (0x20A0) parses independent readings and marks the command 
 });
 
 test('BATTERY2_CONFIG (0x20A1/0x20A2) reads signed offsets and SET payload uses the agreed byte layout', () => {
-    const payload = [0xE9, 0x03, 0xF4, 0xFF, 0xD4, 0x03, 0x22, 0x00, 6, 0xA4, 0x01, 0x5E, 0x01, 0x4A, 0x01, 1, 2, 0, 1, 7];
+    const payload = [0xE9, 0x03, 0xF4, 0xFF, 0xD4, 0x03, 0x22, 0x00, 6, 0xA4, 0x01, 0x5E, 0x01, 0x4A, 0x01, 1, 2, 0, 1, 7, 69];
     let response = null;
     const handler = makeDataHandler(MSPCodes.MSPV2_INAV_BATTERY2_CONFIG, payload, (resp) => { response = resp; });
 
@@ -286,7 +286,8 @@ test('BATTERY2_CONFIG (0x20A1/0x20A2) reads signed offsets and SET payload uses 
         voltage_sensor: 2,
         current_enabled: 0,
         current_sensor: 1,
-        can_battery_id: 7
+        can_battery_id: 7,
+        current_i2c_address: 69
     });
     assert.notEqual(response, null);
 

@@ -1350,6 +1350,12 @@
     "battery2CanId": {
         "message": "CAN battery ID"
     },
+    "battery2CurrentI2cAddress": {
+        "message": "I2C sensor address"
+    },
+    "battery2CurrentI2cAddressHelp": {
+        "message": "Enter the 7-bit I2C address in decimal. 69 is 0x45."
+    },
     "battery2VoltageScale": {
         "message": "Voltage Scale"
     },

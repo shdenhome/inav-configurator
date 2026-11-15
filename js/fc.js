@@ -461,6 +461,7 @@ var FC = {
                 current_enabled: 1,
                 current_sensor: 0,
                 can_battery_id: 1,
+                current_i2c_address: 69,
                 cells: 0,
                 cell_detect: 0,
                 cell_warning: 0,

@@ -46,6 +46,9 @@ function updateBattery2SettingsVisibility() {
     const usesCan = ($('#battery2-voltage-enabled').prop('checked') && $('#battery2-voltage-sensor').val() === '1')
         || ($('#battery2-current-enabled').prop('checked') && $('#battery2-current-sensor').val() === '1');
     $('.battery2-can-id-setting').prop('hidden', !usesCan);
+    const usesI2cCurrent = $('#battery2-current-sensor').val() === '0';
+    $('.battery2-current-i2c-address-setting').prop('hidden', !usesI2cCurrent);
+    $('#battery2-current-i2c-address').prop('disabled', !usesI2cCurrent || !$('#battery2-current-enabled').prop('checked'));
     $('#battery2-voltage-sensor').prop('disabled', !$('#battery2-voltage-enabled').prop('checked'));
     $('#battery2-current-sensor').prop('disabled', !$('#battery2-current-enabled').prop('checked'));
     $('#battery2-voltage-scale, #battery2-voltage-offset').prop('disabled', !$('#battery2-voltage-enabled').prop('checked'));
@@ -146,6 +149,7 @@ configurationTab.initialize = function (callback, scrollPosition) {
         config.current_enabled = $('#battery2-current-enabled').prop('checked') ? 1 : 0;
         config.current_sensor = parseInt($('#battery2-current-sensor').val(), 10);
         config.can_battery_id = parseInt($('#battery2-can-id').val(), 10);
+        config.current_i2c_address = parseInt($('#battery2-current-i2c-address').val(), 10);
         config.cells = parseInt($('#battery2-cells').val(), 10);
         config.cell_detect = Math.round(parseFloat($('#battery2-cell-detect').val()) * 100);
         config.cell_warning = Math.round(parseFloat($('#battery2-cell-warning').val()) * 100);
@@ -337,6 +341,7 @@ configurationTab.initialize = function (callback, scrollPosition) {
             $('#battery2-current-enabled').prop('checked', config.current_enabled !== 0);
             $('#battery2-current-sensor').val(config.current_sensor);
             $('#battery2-can-id').val(config.can_battery_id);
+            $('#battery2-current-i2c-address').val(config.current_i2c_address || 69);
             $('#battery2-cells').val(config.cells);
             $('#battery2-cell-detect').val((config.cell_detect / 100).toFixed(2));
             $('#battery2-cell-warning').val((config.cell_warning / 100).toFixed(2));
