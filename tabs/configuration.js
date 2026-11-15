@@ -448,17 +448,14 @@ configurationTab.initialize = function (callback, scrollPosition) {
 
         interval.add('config_load_battery2', function () {
             if (!FC.BATTERY2.state_supported) {
-                $('#battery2-status').val(i18n.getMessage('battery2Unavailable'));
-                $('#battery2-voltage, #battery2-current, #battery2-drawn').val('—');
+                $('#battery2-voltage, #battery2-current').val('—');
                 return;
             }
             const fresh = Date.now() - FC.BATTERY2.last_received_timestamp < 3000;
             const validState = FC.BATTERY2.state >= 0 && FC.BATTERY2.state <= 2;
             const available = fresh && FC.BATTERY2.present && validState;
-            $('#battery2-status').val(i18n.getMessage(available ? `battery2State${FC.BATTERY2.state}` : 'battery2Unavailable'));
             $('#battery2-voltage').val(available ? `${FC.BATTERY2.voltage.toFixed(2)} V` : '—');
             $('#battery2-current').val(available ? `${FC.BATTERY2.current.toFixed(2)} A` : '—');
-            $('#battery2-drawn').val(available ? `${FC.BATTERY2.drawn_mAh} mAh` : '—');
         }, 100, true);
 
         GUI.content_ready(callback);

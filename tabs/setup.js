@@ -197,11 +197,8 @@ setupTab.initialize = function (callback) {
             const fresh = Date.now() - FC.BATTERY2.last_received_timestamp < 3000;
             const validState = FC.BATTERY2.state >= 0 && FC.BATTERY2.state <= 2;
             const available = fresh && FC.BATTERY2.present && validState;
-            const stateKey = available ? `battery2State${FC.BATTERY2.state}` : 'battery2Unavailable';
-            $('.battery2-status').text(i18n.getMessage(stateKey));
             $('.battery2-voltage').text(available ? `${FC.BATTERY2.voltage.toFixed(2)} V` : '—');
             $('.battery2-current').text(available ? `${FC.BATTERY2.current.toFixed(2)} A` : '—');
-            $('.battery2-drawn').text(available ? `${FC.BATTERY2.drawn_mAh} mAh` : '—');
         }, 100, true);
 
         function updateArminFailure() {
