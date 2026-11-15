@@ -218,82 +218,6 @@
                 </div>
             </div>
 
-            <div class="config-section gui_box grey battery2-section" hidden>
-                <div class="gui_box_titlebar">
-                    <div class="spacer_box_title" data-i18n="battery2Title"></div>
-                </div>
-                <div class="spacer_box">
-                    <div class="number">
-                        <input type="text" id="battery2-voltage" readonly class="disabled" />
-                        <label for="battery2-voltage"><span data-i18n="battery2Voltage"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="text" id="battery2-current" readonly class="disabled" />
-                        <label for="battery2-current"><span data-i18n="battery2Current"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="checkbox" id="battery2-voltage-enabled" class="toggle" />
-                        <label for="battery2-voltage-enabled"><span data-i18n="battery2VoltageEnabled"></span></label>
-                    </div>
-                    <div class="select">
-                        <select id="battery2-voltage-sensor">
-                            <option value="0" data-i18n="battery2SensorI2c">I2C</option>
-                            <option value="1" data-i18n="battery2SensorCan">CAN</option>
-                            <option value="2" data-i18n="battery2SensorAdc">ADC</option>
-                        </select>
-                        <label for="battery2-voltage-sensor"><span data-i18n="battery2VoltageSensor"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="checkbox" id="battery2-current-enabled" class="toggle" />
-                        <label for="battery2-current-enabled"><span data-i18n="battery2CurrentEnabled"></span></label>
-                    </div>
-                    <div class="select">
-                        <select id="battery2-current-sensor">
-                            <option value="0" data-i18n="battery2CurrentSensorI2c">I2C</option>
-                            <option value="1" data-i18n="battery2SensorCan">CAN</option>
-                            <option value="2" data-i18n="battery2SensorAdc">ADC</option>
-                        </select>
-                        <label for="battery2-current-sensor"><span data-i18n="battery2CurrentSensor"></span></label>
-                    </div>
-                    <div class="number battery2-can-id-setting">
-                        <input type="number" id="battery2-can-id" step="1" min="0" max="255" />
-                        <label for="battery2-can-id"><span data-i18n="battery2CanId"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-voltage-scale" step="1" min="1" max="65535" />
-                        <label for="battery2-voltage-scale"><span data-i18n="configurationBatteryScale"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-voltage-offset" step="0.01" min="-327.68" max="327.67" />
-                        <label for="battery2-voltage-offset"><span data-i18n="battery2VoltageOffset"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-current-scale" step="1" min="1" max="65535" />
-                        <label for="battery2-current-scale"><span data-i18n="configurationCurrentScale"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-current-offset" step="1" min="-32768" max="32767" />
-                        <label for="battery2-current-offset"><span data-i18n="configurationCurrentOffset"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-cells" step="1" min="0" max="12" />
-                        <label for="battery2-cells"><span data-i18n="battery2Cells"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-cell-detect" step="0.01" min="2.50" max="5.00" />
-                        <label for="battery2-cell-detect"><span data-i18n="battery2CellDetect"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-cell-warning" step="0.01" min="2.50" max="4.50" />
-                        <label for="battery2-cell-warning"><span data-i18n="battery2CellWarning"></span></label>
-                    </div>
-                    <div class="number">
-                        <input type="number" id="battery2-cell-critical" step="0.01" min="2.50" max="4.50" />
-                        <label for="battery2-cell-critical"><span data-i18n="battery2CellCritical"></span></label>
-                    </div>
-                </div>
-            </div>
-
             <div class="config-section gui_box grey">
                 <div class="gui_box_titlebar">
                     <div class="spacer_box_title" data-i18n="configurationPowerLimits"></div>
@@ -364,6 +288,90 @@
                             <span data-i18n="configurationLimitBurstPowerFalldownTime"></span>
                         </label>
                         <div for="limit_burst_power_falldown_time" class="helpicon cf_tip" data-i18n_title="configurationLimitBurstPowerFalldownTimeHelp"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section gui_box grey battery2-section" hidden>
+                <div class="gui_box_titlebar">
+                    <div class="spacer_box_title" data-i18n="configurationVoltageCurrentSensor"></div>
+                </div>
+                <div class="spacer_box">
+                    <div class="number">
+                        <input type="checkbox" id="battery2-voltage-enabled" class="toggle" />
+                        <label for="battery2-voltage-enabled"><span data-i18n="battery2VoltageEnabled"></span></label>
+                    </div>
+                    <div class="select">
+                        <select id="battery2-voltage-sensor">
+                            <option value="0" data-i18n="battery2SensorI2c">I2C</option>
+                            <option value="1" data-i18n="battery2SensorCan">CAN</option>
+                            <option value="2" data-i18n="battery2SensorAdc">ADC</option>
+                        </select>
+                        <label for="battery2-voltage-sensor"><span data-i18n="battery2VoltageSensor"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-voltage-scale" step="1" min="1" max="65535" />
+                        <label for="battery2-voltage-scale"><span data-i18n="configurationBatteryScale"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-voltage-offset" step="0.01" min="-327.68" max="327.67" />
+                        <label for="battery2-voltage-offset"><span data-i18n="battery2VoltageOffset"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="text" id="battery2-voltage" readonly class="disabled" />
+                        <label for="battery2-voltage"><span data-i18n="battery2Voltage"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="checkbox" id="battery2-current-enabled" class="toggle" />
+                        <label for="battery2-current-enabled"><span data-i18n="battery2CurrentEnabled"></span></label>
+                    </div>
+                    <div class="select">
+                        <select id="battery2-current-sensor">
+                            <option value="0" data-i18n="battery2CurrentSensorI2c">I2C</option>
+                            <option value="1" data-i18n="battery2SensorCan">CAN</option>
+                            <option value="2" data-i18n="battery2SensorAdc">ADC</option>
+                        </select>
+                        <label for="battery2-current-sensor"><span data-i18n="battery2CurrentSensor"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-current-scale" step="1" min="1" max="65535" />
+                        <label for="battery2-current-scale"><span data-i18n="configurationCurrentScale"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-current-offset" step="1" min="-32768" max="32767" />
+                        <label for="battery2-current-offset"><span data-i18n="configurationCurrentOffset"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="text" id="battery2-current" readonly class="disabled" />
+                        <label for="battery2-current"><span data-i18n="battery2Current"></span></label>
+                    </div>
+                    <div class="number battery2-can-id-setting">
+                        <input type="number" id="battery2-can-id" step="1" min="0" max="255" />
+                        <label for="battery2-can-id"><span data-i18n="battery2CanId"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section gui_box grey battery2-section" hidden>
+                <div class="gui_box_titlebar">
+                    <div class="spacer_box_title" data-i18n="battery2Settings"></div>
+                </div>
+                <div class="spacer_box">
+                    <div class="number">
+                        <input type="number" id="battery2-cells" step="1" min="0" max="12" />
+                        <label for="battery2-cells"><span data-i18n="battery2Cells"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-cell-detect" step="0.01" min="2.50" max="5.00" />
+                        <label for="battery2-cell-detect"><span data-i18n="battery2CellDetect"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-cell-warning" step="0.01" min="2.50" max="4.50" />
+                        <label for="battery2-cell-warning"><span data-i18n="battery2CellWarning"></span></label>
+                    </div>
+                    <div class="number">
+                        <input type="number" id="battery2-cell-critical" step="0.01" min="2.50" max="4.50" />
+                        <label for="battery2-cell-critical"><span data-i18n="battery2CellCritical"></span></label>
                     </div>
                 </div>
             </div>

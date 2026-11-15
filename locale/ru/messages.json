@@ -849,6 +849,9 @@
     "battery2Title": {
         "message": "Вторая батарея"
     },
+    "battery2Settings": {
+        "message": "Настройки второй батареи"
+    },
     "battery2Status": {
         "message": "Состояние датчика"
     },

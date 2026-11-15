@@ -1308,6 +1308,9 @@
     "battery2Title": {
         "message": "Second Battery"
     },
+    "battery2Settings": {
+        "message": "Second Battery Settings"
+    },
     "battery2Status": {
         "message": "Sensor status"
     },
