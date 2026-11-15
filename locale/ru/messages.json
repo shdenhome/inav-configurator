@@ -916,7 +916,7 @@
         "message": "Порог предупреждения на ячейку (В)"
     },
     "battery2CellCritical": {
-        "message": "Критический порог на ячейку (В)"
+        "message": "Критическое напряжение ячейки"
     },
     "battery2Unavailable": {
         "message": "Недоступен"

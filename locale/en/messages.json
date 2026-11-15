@@ -1372,7 +1372,7 @@
         "message": "Warning cell voltage (V)"
     },
     "battery2CellCritical": {
-        "message": "Critical cell voltage (V)"
+        "message": "Critical cell voltage"
     },
     "battery2Unavailable": {
         "message": "Unavailable"
