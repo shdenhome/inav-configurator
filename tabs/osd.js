@@ -1523,27 +1523,32 @@ OSD.constants = {
             items: [
                 {
                     name: 'BATTERY2_VOLTAGE',
-                    id: 172,
-                    preview: osdDecimalsMainBatteryPreview() + '.2'
+                    id: 173,
+                    preview: function() {
+                        return osdDecimalsMainBatteryPreview() + '.2';
+                    }
                 },
                 {
                     name: 'BATTERY2_CELL_VOLTAGE',
-                    id: 175,
+                    id: 176,
                     preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('3.90') + FONT.symbol(SYM.VOLT) + '.2'
                 },
                 {
                     name: 'BATTERY2_CURRENT_DRAW',
-                    id: 173,
+                    id: 174,
                     preview: FONT.embed_dot('42.1') + FONT.symbol(SYM.AMP) + '.2'
                 },
                 {
                     name: 'BATTERY2_MAH_DRAWN',
-                    id: 174,
-                    preview: osdmAhPrecisionPreview() + '.2'
+                    id: 175,
+                    preview: function() {
+                        const mah = Math.floor(1000 + Math.random() * 9000);
+                        return mah + FONT.symbol(SYM.MAH) + '.2';
+                    }
                 },
                 {
                     name: 'BATTERY2_POWER',
-                    id: 176,
+                    id: 177,
                     preview: ' 69' + FONT.symbol(SYM.WATT) + '.2'
                 }
             ]
