@@ -49,8 +49,8 @@ function updateBattery2SettingsVisibility() {
     $('#battery2-voltage-sensor').prop('disabled', !$('#battery2-voltage-enabled').prop('checked'));
     $('#battery2-current-sensor').prop('disabled', !$('#battery2-current-enabled').prop('checked'));
     $('#battery2-voltage-scale, #battery2-voltage-offset').prop('disabled', !$('#battery2-voltage-enabled').prop('checked'));
-    const usesI2cCurrent = $('#battery2-current-enabled').prop('checked') && $('#battery2-current-sensor').val() === '0';
-    $('#battery2-current-scale, #battery2-current-offset').prop('disabled', !usesI2cCurrent);
+    const usesCalibratedCurrent = $('#battery2-current-enabled').prop('checked') && $('#battery2-current-sensor').val() !== '1';
+    $('#battery2-current-scale, #battery2-current-offset').prop('disabled', !usesCalibratedCurrent);
     $('#battery2-voltage-scale, #battery2-voltage-offset').prop('disabled', !$('#battery2-voltage-enabled').prop('checked') || $('#battery2-voltage-sensor').val() === '1');
 }
 
@@ -325,6 +325,8 @@ configurationTab.initialize = function (callback, scrollPosition) {
 
         if (FC.BATTERY2.config_supported) {
             $('.battery2-section').prop('hidden', false);
+            const supportsBattery2Adc = FC.CONFIG.target === 'MATEKH743';
+            $('#battery2-voltage-sensor option[value="2"], #battery2-current-sensor option[value="2"]').prop('hidden', !supportsBattery2Adc);
             const config = FC.BATTERY2.config;
             $('#battery2-voltage-scale').val(config.voltage_scale);
             $('#battery2-voltage-offset').val((config.voltage_offset / 100).toFixed(2));
@@ -339,7 +341,28 @@ configurationTab.initialize = function (callback, scrollPosition) {
             $('#battery2-cell-detect').val((config.cell_detect / 100).toFixed(2));
             $('#battery2-cell-warning').val((config.cell_warning / 100).toFixed(2));
             $('#battery2-cell-critical').val((config.cell_critical / 100).toFixed(2));
-            $('#battery2-voltage-enabled, #battery2-voltage-sensor, #battery2-current-enabled, #battery2-current-sensor').on('change', updateBattery2SettingsVisibility);
+            $('#battery2-voltage-enabled, #battery2-current-enabled').on('change', updateBattery2SettingsVisibility);
+            $('#battery2-voltage-sensor').on('change', function () {
+                const voltageScale = parseInt($('#battery2-voltage-scale').val(), 10);
+                if ($(this).val() === '2' && voltageScale === 1000) {
+                    $('#battery2-voltage-scale').val(2100);
+                } else if ($(this).val() === '0' && voltageScale === 2100) {
+                    $('#battery2-voltage-scale').val(1000);
+                }
+                updateBattery2SettingsVisibility();
+            });
+            $('#battery2-current-sensor').on('change', function () {
+                const adcDefaultScale = FC.CURRENT_METER_CONFIG.scale || 250;
+                const currentScale = parseInt($('#battery2-current-scale').val(), 10);
+                if ($(this).val() === '2' && currentScale === 2) {
+                    $('#battery2-current-scale').val(adcDefaultScale);
+                    $('#battery2-current-offset').val(FC.CURRENT_METER_CONFIG.offset || 0);
+                } else if ($(this).val() === '0' && currentScale === adcDefaultScale) {
+                    $('#battery2-current-scale').val(2);
+                    $('#battery2-current-offset').val(0);
+                }
+                updateBattery2SettingsVisibility();
+            });
             updateBattery2SettingsVisibility();
         }
 
