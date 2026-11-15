@@ -877,7 +877,7 @@
         "message": "Тип датчика тока"
     },
     "battery2SensorI2c": {
-        "message": "I2C (Matek INA228/INA238)"
+        "message": "I2C"
     },
     "battery2SensorCan": {
         "message": "CAN"
