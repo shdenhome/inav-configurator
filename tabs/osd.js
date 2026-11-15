@@ -1539,7 +1539,12 @@ OSD.constants = {
                 {
                     name: 'BATTERY2_MAH_DRAWN',
                     id: 174,
-                    preview: osdmAhPrecisionPreview()
+                    preview: 'B2:' + osdmAhPrecisionPreview()
+                },
+                {
+                    name: 'BATTERY2_POWER',
+                    id: 176,
+                    preview: 'B2: 69' + FONT.symbol(SYM.WATT)
                 }
             ]
         },

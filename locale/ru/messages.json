@@ -882,6 +882,9 @@
     "battery2SensorCan": {
         "message": "CAN"
     },
+    "battery2CurrentSensorI2c": {
+        "message": "I2C"
+    },
     "battery2CanId": {
         "message": "ID батареи CAN"
     },
