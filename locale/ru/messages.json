@@ -883,7 +883,7 @@
         "message": "CAN"
     },
     "battery2SensorAdc": {
-        "message": "АЦП"
+        "message": "ADC"
     },
     "battery2CurrentSensorI2c": {
         "message": "I2C"
