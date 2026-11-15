@@ -1524,27 +1524,27 @@ OSD.constants = {
                 {
                     name: 'BATTERY2_VOLTAGE',
                     id: 172,
-                    preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('22.2') + FONT.symbol(SYM.VOLT)
+                    preview: osdDecimalsMainBatteryPreview() + '.2'
                 },
                 {
                     name: 'BATTERY2_CELL_VOLTAGE',
                     id: 175,
-                    preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('3.70') + FONT.symbol(SYM.VOLT)
+                    preview: FONT.symbol(SYM.BATT) + FONT.embed_dot('3.90') + FONT.symbol(SYM.VOLT) + '.2'
                 },
                 {
                     name: 'BATTERY2_CURRENT_DRAW',
                     id: 173,
-                    preview: FONT.embed_dot('12.3') + FONT.symbol(SYM.AMP)
+                    preview: FONT.embed_dot('42.1') + FONT.symbol(SYM.AMP) + '.2'
                 },
                 {
                     name: 'BATTERY2_MAH_DRAWN',
                     id: 174,
-                    preview: 'B2:' + osdmAhPrecisionPreview()
+                    preview: osdmAhPrecisionPreview() + '.2'
                 },
                 {
                     name: 'BATTERY2_POWER',
                     id: 176,
-                    preview: 'B2: 69' + FONT.symbol(SYM.WATT)
+                    preview: ' 69' + FONT.symbol(SYM.WATT) + '.2'
                 }
             ]
         },
