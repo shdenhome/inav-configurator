@@ -4839,6 +4839,9 @@
     "osdElement_BATTERY2_MAH_DRAWN": {
         "message": "Second Battery mAh Drawn"
     },
+    "osdElement_BATTERY2_POWER": {
+        "message": "Second Battery Power"
+    },
     "osdElement_SAG_COMP_MAIN_BATT_VOLTAGE": {
         "message": "Sag-compensated Battery Voltage"
     },

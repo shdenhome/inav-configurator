@@ -3722,6 +3722,9 @@
     "osdElement_BATTERY2_MAH_DRAWN": {
         "message": "Расход ёмкости второй батареи (мА·ч)"
     },
+    "osdElement_BATTERY2_POWER": {
+        "message": "Мощность второй батареи"
+    },
     "BLOCKED_SENSORS_CALIBRATING": {
         "message": "Калибровка во время работы"
     },
