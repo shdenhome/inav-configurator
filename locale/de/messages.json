@@ -5273,6 +5273,9 @@
     "servoMixerDelete": {
         "message": "Löschen"
     },
+    "motorMixerInsertFirst": {
+        "message": "Am Anfang der Liste hinzufügen"
+    },
     "servoMixerAdd": {
         "message": "Neue Mixer-Regel hinzufügen"
     },

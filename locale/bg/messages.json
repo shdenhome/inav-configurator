@@ -4915,6 +4915,9 @@
   "servoMixerDelete": {
     "message": "Изтрий"
   },
+  "motorMixerInsertFirst": {
+    "message": "Добави в началото на списъка"
+  },
   "servoMixerAdd": {
     "message": "Добави ново правило за миксер"
   },

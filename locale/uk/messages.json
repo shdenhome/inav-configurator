@@ -4938,6 +4938,9 @@
     "servoMixerDelete": {
         "message": "Видалити"
     },
+    "motorMixerInsertFirst": {
+        "message": "Додати на початок списку"
+    },
     "servoMixerAdd": {
         "message": "Додати нове правило мікшера"
     },

@@ -478,3 +478,14 @@
 .tab-motors .mixer-preview-image-numbers {
     width: fit-content;
 }
+
+.tab-motors .motorOutputNumber {
+    visibility: visible;
+    transform: translate(-50%, -50%);
+    font-size: 1em;
+    font-weight: bold;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    padding: 1px 2px;
+}

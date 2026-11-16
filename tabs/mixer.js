@@ -14,6 +14,7 @@ import interval from './../js/intervals';
 import ServoMixRule from './../js/servoMixRule';
 import { getServoTargetWarning } from './../js/servoMixerTargetWarning';
 import MotorMixRule from './../js/motorMixRule';
+import { getMotorPreviewLabels } from './../js/motorMixerPreview';
 import BitHelper from './../js/bitHelper';
 
 const mixerTab = {};
@@ -170,6 +171,8 @@ mixerTab.initialize = function (callback, scrollPosition) {
         }
     }
 
+    let motorPreviewOutputMap = [];
+
     function renderOutputMapping() {
         let isMR = FC.MIXER_CONFIG.platformType == PLATFORM.MULTIROTOR || FC.MIXER_CONFIG.platformType == PLATFORM.TRICOPTER;
         let jsMap = FC.OUTPUT_MAPPING.getOutputTable(isMR, FC.MOTOR_RULES.getNumberOfConfiguredMotors(), FC.SERVO_RULES.getUsedServoIndexes());
@@ -187,6 +190,8 @@ mixerTab.initialize = function (callback, scrollPosition) {
             $('#function-' + i).html(outputMap[i - 1]);
         }
 
+        motorPreviewOutputMap = outputMap;
+        labelMotorNumbers();
         renderServoOutputImage(outputMap);
     }
 
@@ -481,65 +486,53 @@ mixerTab.initialize = function (callback, scrollPosition) {
 
 
     function labelMotorNumbers() {
-
-        let index = 0;
-        var rules;
-
-        if (currentMixerPreset.id == loadedMixerPresetID) {
-            rules = FC.MOTOR_RULES.get();
-        } else {
-            rules = currentMixerPreset.motorMixer;
+        const $preview = $('.mixerPreview');
+        $preview.find('.motorNumber').remove();
+        if (!['quad_x', 'quad_p'].includes(currentMixerPreset.image)) {
+            return;
         }
 
-        if (currentMixerPreset.image != 'quad_x' && currentMixerPreset.image != 'quad_p') {
-            for (let i = 1; i < 5; i++) {
-                $("#motorNumber"+i).css("visibility", "hidden");
-            }
-        }
-
-        const $img = $("#motor-mixer-preview-img");
+        const $img = $('#motor-mixer-preview-img');
         const imgHeight = $img.height();
-
-        // Skip positioning if image hasn't loaded yet (height would be 0)
         if (imgHeight === 0) {
             return;
         }
 
-        for (const i in rules) {
-            if (rules.hasOwnProperty(i)) {
-                const rule = rules[i];
-                index++;
-
-                if (currentMixerPreset.image != 'quad_x' && currentMixerPreset.image != 'quad_p') {
-                    continue;
-                }
-
-                let top_px = 28;
-                let left_px = 28;
-
-                const roll = rule.getRoll();
-                const pitch = rule.getPitch();
-
-                if (Math.abs(roll) < 0.1) {
-                    // Center horizontally (Plus: front/rear motors)
-                    left_px = ($img.width() - 14) / 2;
-                } else if (roll < -0.5) {
-                    left_px = $img.width() - 42;
-                }
-
-                if (Math.abs(pitch) < 0.1) {
-                    // Center vertically (Plus: left/right motors)
-                    top_px = (imgHeight - 14) / 2;
-                } else if (pitch > 0.5) {
-                    top_px = imgHeight - 44;
-                }
-
-                $("#motorNumber"+index).css("left", left_px + "px");
-                $("#motorNumber"+index).css("top", top_px + "px");
-                $("#motorNumber"+index).removeClass("is-hidden");
-                $("#motorNumber"+index).css("visibility", "visible");
-            }
+        const applied = currentMixerPreset.id == loadedMixerPresetID;
+        if (currentMixerPreset.image === 'quad_p') {
+            const rules = applied ? FC.MOTOR_RULES.get() : currentMixerPreset.motorMixer;
+            rules.slice(0, 4).forEach((rule, index) => {
+                let top = rule.getPitch() > 0.5 ? imgHeight - 44 : 28;
+                let left = rule.getRoll() < -0.5 ? $img.width() - 42 : 28;
+                if (Math.abs(rule.getRoll()) < 0.1) left = ($img.width() - 14) / 2;
+                if (Math.abs(rule.getPitch()) < 0.1) top = (imgHeight - 14) / 2;
+                $preview.append($('<div class="motorNumber"></div>')
+                    .css({ left: left + 'px', top: top + 'px' })
+                    .text(index + 1));
+            });
+            return;
         }
+
+        const labels = getMotorPreviewLabels(
+            currentMixerPreset.motorMixer,
+            applied ? FC.MOTOR_RULES.get() : [],
+            applied ? motorPreviewOutputMap : []);
+
+        labels.forEach((label, index) => {
+            const rule = currentMixerPreset.motorMixer[index];
+            let top = rule.getPitch() > 0.5 ? imgHeight - 44 : 28;
+            let left = rule.getRoll() < -0.5 ? $img.width() - 42 : 28;
+            if (Math.abs(rule.getRoll()) < 0.1) left = ($img.width() - 14) / 2;
+            if (Math.abs(rule.getPitch()) < 0.1) top = (imgHeight - 14) / 2;
+
+            const $label = $('<div class="motorNumber motorNumber-quad-x"></div>')
+                .css({ left: left + 'px', top: top + 'px' })
+                .append($('<span class="motorNumber-base"></span>').text(label.baseNumber));
+            if (applied) {
+                $label.append($('<span class="motorNumber-output"></span>').text(label.outputs.join('/') || '—'));
+            }
+            $preview.append($label);
+        });
     }
 
 
@@ -1078,6 +1071,8 @@ mixerTab.initialize = function (callback, scrollPosition) {
             renderOutputMapping();
         });
 
+        $motorMixTableBody.on('change', "input", labelMotorNumbers);
+
         $servoMixTableBody.on('change', "input", function (event) {
             renderOutputMapping();
         });
@@ -1086,6 +1081,14 @@ mixerTab.initialize = function (callback, scrollPosition) {
             if (FC.SERVO_RULES.hasFreeSlots()) {
                 FC.SERVO_RULES.put(new ServoMixRule(FC.SERVO_RULES.getNextUnusedIndex(), 0, 100, 0));
                 renderServoMixRules();
+                FC.OUTPUT_MAPPING.invalidateDirectAssignment();
+                renderOutputMapping();
+            }
+        });
+
+        $("[data-role='role-motor-insert-first']").on('click', function () {
+            if (FC.MOTOR_RULES.insertAtStart(new MotorMixRule(1, 0, 0, 0))) {
+                renderMotorMixRules();
                 FC.OUTPUT_MAPPING.invalidateDirectAssignment();
                 renderOutputMapping();
             }

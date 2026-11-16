@@ -4884,6 +4884,9 @@
     "servoMixerDelete": {
         "message": "Elimina"
     },
+    "motorMixerInsertFirst": {
+        "message": "Aggiungi all’inizio dell’elenco"
+    },
     "servoMixerAdd": {
         "message": "Aggiungi nuova regola mixer"
     },

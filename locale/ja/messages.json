@@ -4926,6 +4926,9 @@
     "servoMixerDelete": {
         "message": "削除"
     },
+    "motorMixerInsertFirst": {
+        "message": "リストの先頭に追加"
+    },
     "servoMixerAdd": {
         "message": "新しいミキサールールを追加"
     },

@@ -5423,6 +5423,9 @@
   "servoMixerDelete": {
     "message": "Obriši"
   },
+  "motorMixerInsertFirst": {
+    "message": "Dodaj na početak liste"
+  },
   "servoMixerAdd": {
     "message": "Dodaj novo mixer pravilo"
   },

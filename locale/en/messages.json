@@ -6009,6 +6009,9 @@
     "servoMixerDelete": {
         "message": "Delete"
     },
+    "motorMixerInsertFirst": {
+        "message": "Add to start of list"
+    },
     "servoMixerAdd": {
         "message": "Add new mixer rule"
     },

@@ -13,6 +13,7 @@ import features from './../js/feature_framework';
 import { mixer, PLATFORM } from './../js/model';
 import timeout from './../js/timeouts';
 import interval from './../js/intervals';
+import { getMotorPreviewLabels } from './../js/motorMixerPreview';
 
 /* Phase 0 of the firmware's calibration state machine, which is also how the
  * sequence is called off. Out here because cleanup() needs it too. */
@@ -49,11 +50,12 @@ outputsTab.initialize = function (callback) {
         mspHelper.loadFeatures,
         mspHelper.load3dConfig,
         mspHelper.loadMotors,
+        mspHelper.loadMixerConfig,
         mspHelper.loadMotorMixRules,
         mspHelper.loadServoMixRules,
-        mspHelper.loadMixerConfig,
         mspHelper.loadServoConfiguration,
         mspHelper.loadOutputMappingExt,
+        mspHelper.loadTimerOutputModes,
         mspHelper.loadRcData,
         mspHelper.loadAdvancedConfig,
         /* Needed to count the ports assigned to Spektrum Smart ESC. Without it
@@ -111,6 +113,9 @@ outputsTab.initialize = function (callback) {
         process_servos();
         processConfiguration(settingsPromise);
 
+        mspHelper.loadOutputAssignment(function () {
+            if (GUI.active_tab === self) labelMotorNumbers();
+        });
         finalize();
     }
 
@@ -547,9 +552,12 @@ outputsTab.initialize = function (callback) {
         const isReversed = isMotorInverted && (FC.MIXER_CONFIG.platformType == PLATFORM.MULTIROTOR || FC.MIXER_CONFIG.platformType == PLATFORM.TRICOPTER);
 
         import(`./../resources/motor_order/${mixer.getById(val).image}${isReversed ? "_reverse" : ""}.svg`).then(({default: path}) => {
-            $('.mixerPreview img').attr('src', path);
+            if (GUI.active_tab !== self) return;
+            const $img = $('#motor-mixer-preview-img');
+            $img.off('load.motorNumbers').on('load.motorNumbers', labelMotorNumbers);
+            $img.attr('src', path);
+            if ($img[0].complete) labelMotorNumbers();
         });
-        labelMotorNumbers();
     }
 
     function process_servos() {
@@ -1016,36 +1024,30 @@ outputsTab.initialize = function (callback) {
         GUI.content_ready(callback);
     }
 
-   function labelMotorNumbers() {
+    function labelMotorNumbers() {
+        const $preview = $('.mixerPreview');
+        $preview.find('.motorNumber').remove();
+        const preset = mixer.getById(FC.MIXER_CONFIG.appliedMixerPreset);
+        if (!preset || preset.image !== 'quad_x') return;
 
-       if (mixer.getById(FC.MIXER_CONFIG.appliedMixerPreset).image != 'quad_x') {
-           return;
-       }
-
-
-        let index = 0;
-        var rules = FC.MOTOR_RULES.get();
-
-        for (const i in rules) {
-            if (rules.hasOwnProperty(i)) {
-                const rule = rules[i];
-                index++;
-
-                let top_px = 30;
-                let left_px = 28;
-                if (rule.getRoll() < -0.5) {
-                  left_px = $("#motor-mixer-preview-img").width() - 20;
-                }
-
-                if (rule.getPitch() > 0.5) {
-                  top_px = $("#motor-mixer-preview-img").height() - 20;
-                }
-                $("#motorNumber"+index).css("left", left_px + "px");
-                $("#motorNumber"+index).css("top", top_px + "px");
-                $("#motorNumber"+index).css("visibility", "visible");
-            }
-        }
+        const $img = $('#motor-mixer-preview-img');
+        if (!$img.width() || !$img.height()) return;
+        const isMR = FC.MIXER_CONFIG.platformType == PLATFORM.MULTIROTOR || FC.MIXER_CONFIG.platformType == PLATFORM.TRICOPTER;
+        const outputMap = FC.OUTPUT_MAPPING.hasDirectAssignment()
+            ? FC.OUTPUT_MAPPING.getOutputTableDirect()
+            : FC.OUTPUT_MAPPING.getOutputTable(isMR, FC.MOTOR_RULES.getNumberOfConfiguredMotors(), FC.SERVO_RULES.getUsedServoIndexes());
+        const labels = getMotorPreviewLabels(preset.motorMixer, FC.MOTOR_RULES.get(), outputMap);
+        labels.forEach((label, index) => {
+            const rule = preset.motorMixer[index];
+            $preview.append($('<div class="motorNumber motorOutputNumber"></div>')
+                .text(label.outputs.join('/') || '—')
+                .css({
+                    left: $img.width() * (rule.getRoll() < 0 ? 0.8 : 0.2) + 'px',
+                    top: $img.height() * (rule.getPitch() > 0 ? 0.8 : 0.2) + 'px',
+                }));
+        });
     }
+
 
 
 };

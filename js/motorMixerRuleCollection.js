@@ -25,6 +25,15 @@ var MotorMixerRuleCollection = function () {
         }
     };
 
+    self.insertAtStart = function (element) {
+        if (!self.hasFreeSlots()) {
+            return false;
+        }
+
+        data.unshift(element);
+        return true;
+    };
+
     self.get = function () {
         return data;
     };

@@ -4946,6 +4946,9 @@
     "servoMixerDelete": {
         "message": "删除"
     },
+    "motorMixerInsertFirst": {
+        "message": "添加到列表开头"
+    },
     "servoMixerAdd": {
         "message": "新增混控规则"
     },
