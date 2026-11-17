@@ -1692,6 +1692,12 @@
     "configurationGimbalTiltChannel": {
         "message": "Tilt channel (pitch)"
     },
+    "configurationGimbalModeChannel": {
+        "message": "Gimbal mode channel"
+    },
+    "configurationGimbalModeChannelHelp": {
+        "message": "0 keeps INAV mode control. Enter the RC channel number: low, middle and high switch positions select modes 0, 1 and 2 respectively. Center and Headtracker take priority. Invalid or missing input selects mode 0."
+    },
     "configurationGimbalRollChannel": {
         "message": "Roll channel"
     },

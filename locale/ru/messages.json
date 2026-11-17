@@ -741,6 +741,12 @@
     "BLACKBOX_FEATURE_GYRO_PEAKS_ROLL": {
         "message": "Пиковая частота шума гироскопа. Крен"
     },
+    "configurationGimbalModeChannel": {
+        "message": "Канал режима подвеса"
+    },
+    "configurationGimbalModeChannelHelp": {
+        "message": "0 — управление режимами INAV. Укажите номер RC-канала: нижнее, среднее и верхнее положения переключателя выбирают режимы 0, 1 и 2 соответственно. Center и Headtracker имеют приоритет. При некорректном или отсутствующем сигнале выбирается режим 0."
+    },
     "configurationGimbalRollChannel": {
         "message": "Канал крена"
     },
