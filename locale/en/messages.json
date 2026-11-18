@@ -7955,5 +7955,17 @@
     },
     "magCalibOrientationNotDetected": {
         "message": "The compass alignment setting didn't change during that calibration spin. This usually means INAV wasn't confident enough to detect the mounting orientation -- but if it was already set correctly (e.g. from a previous run of this wizard), this is also what a successful, unchanged detection looks like. If your compass heading looks wrong on the Status tab, use the auto alignment wizard on the <b>Alignment</b> tab to set it manually."
+    },
+    "configurationMultiBaro": {
+        "message": "Multi barometer"
+    },
+    "configurationMultiBaroTip": {
+        "message": "Read multiple barometers and combine their measurements using adaptive confidence. Apply with Save and Reboot."
+    },
+    "configurationMultiImu": {
+        "message": "Multi IMU"
+    },
+    "configurationMultiImuTip": {
+        "message": "Read multiple IMUs and combine their measurements using adaptive confidence. Apply with Save and Reboot, then perform six-position accelerometer calibration."
     }
 }
