@@ -10,6 +10,8 @@ import i18n from './../js/localization';
 import { zeroPad } from './../js/helpers';
 import dialog from '../js/dialog';
 import store from './../js/store';
+import { createMultiSensorCsvSchema } from '../js/multiSensorTelemetry.js';
+import { createLegacyLogSchema, createSensorLogPoll, createSensorLogWriter } from '../js/sensorLogPoll.js';
 
 
 const loggingTab = {};
@@ -18,6 +20,23 @@ loggingTab.initialize = function (callback) {
 
     let loggingFileName = null;
     let readyToWrite = false;
+    let writer = null;
+    let csvSchema = null;
+    let legacySchema = null;
+    self.active = true;
+    self.poller = null;
+    self.stopping = false;
+
+    function flushLogBuffer() {
+        return writer ? writer.append(log_buffer.splice(0)) : Promise.resolve();
+    }
+    self.finishLogging = function () {
+        self.active = false;
+        self.poller?.cancel();
+        interval.remove('log_data_poll');
+        interval.remove('write_data');
+        return flushLogBuffer();
+    };
 
     if (GUI.active_tab !== this) {
         GUI.active_tab = this;
@@ -25,12 +44,15 @@ loggingTab.initialize = function (callback) {
 
     var requested_properties = [],
         samples = 0,
-        requests = 0,
         log_buffer = [];
 
     if (CONFIGURATOR.connectionValid) {
         var get_motor_data = function () {
-            MSP.send_message(MSPCodes.MSP_MOTOR, false, false, load_html);
+            MSP.send_message(MSPCodes.MSP_MOTOR, false, false, function () {
+                MSP.send_message(MSPCodes.MSP_SENSOR_CONFIG, false, false, function () {
+                    if (self.active && GUI.active_tab === loggingTab) load_html();
+                });
+            });
         }
 
         var load_html = function () {
@@ -44,10 +66,15 @@ loggingTab.initialize = function (callback) {
         // translate to user-selected language
         i18n.localize();;
 
+        const info = FC.SENSOR_CONFIG.multiSensors;
+        if (info?.telemetrySupported && info.imuEnabled) $('.properties input[name="MSP_RAW_IMU"]').closest('dt').next('dd').text(i18n.getMessage('loggingMultiImuColumns'));
+        if (info?.telemetrySupported && info.baroEnabled) $('.properties input[name="MSP_ALTITUDE"]').closest('dt').next('dd').text(i18n.getMessage('loggingMultiBaroColumns'));
+
         // UI hooks
         $('a.log_file').on('click', prepare_file);
 
-        $('a.logging').on('click', function () {
+        $('a.logging').on('click', async function () {
+            if (self.stopping) return;
             if (GUI.connected_to) {
                 if (readyToWrite) {
                     var clicks = $(this).data('clicks');
@@ -55,7 +82,6 @@ loggingTab.initialize = function (callback) {
                     if (!clicks) {
                         // reset some variables before start
                         samples = 0;
-                        requests = 0;
                         log_buffer = [];
                         requested_properties = [];
 
@@ -64,29 +90,31 @@ loggingTab.initialize = function (callback) {
                         });
 
                         if (requested_properties.length) {
-                            // print header for the csv file
+                            const info = FC.SENSOR_CONFIG.multiSensors;
+                            csvSchema = createMultiSensorCsvSchema({
+                                imu: info?.telemetrySupported && info.imuEnabled && requested_properties.includes('MSP_RAW_IMU'),
+                                baro: info?.telemetrySupported && info.baroEnabled && requested_properties.includes('MSP_ALTITUDE'),
+                            });
+                            legacySchema = createLegacyLogSchema(requested_properties, FC);
+                            const sessionFileName = loggingFileName;
+                            writer = createSensorLogWriter(
+                                text => window.electronAPI.appendFile(sessionFileName, text),
+                                count => $('.samples').text(samples += count),
+                                error => {
+                                    console.error('Sensor CSV write failed:', error);
+                                    GUI.log(i18n.getMessage('loggingSensorWriteFailed'));
+                                    readyToWrite = false;
+                                    self.poller?.cancel();
+                                    self.poller = null;
+                                    interval.remove('log_data_poll');
+                                    interval.remove('write_data');
+                                    $('.speed').prop('disabled', false);
+                                    $('a.logging').text(i18n.getMessage('loggingStart')).data('clicks', false);
+                                });
                             print_head();
-
-                            var log_data_poll = function () {
-                                if (requests) {
-                                    // save current data (only after everything is initialized)
-                                    crunch_data();
-                                }
-
-                                // request new
-                                for (var i = 0; i < requested_properties.length; i++, requests++) {
-                                    MSP.send_message(MSPCodes[requested_properties[i]]);
-                                }
-                            }
-
-                            interval.add('log_data_poll', log_data_poll, parseInt($('select.speed').val()), true); // refresh rate goes here
-                            interval.add('write_data', function write_data() {
-                                if (log_buffer.length && readyToWrite) { // only execute when there is actual data to write
-                                    window.electronAPI.appendFile(loggingFileName, log_buffer.join('\n') + '\n');
-                                    $('.samples').text(samples += log_buffer.length);
-                                    log_buffer = [];
-                                }
-                            }, 1000);
+                            self.poller = createSensorLogPoll(MSP, requested_properties.map(name=>MSPCodes[name]), csvSchema.headers.length > 0, crunch_data);
+                            interval.add('log_data_poll', () => self.poller.poll().catch(error => console.error('Sensor CSV sample failed:', error)), parseInt($('select.speed').val()), true);
+                            interval.add('write_data', () => { if (readyToWrite) flushLogBuffer(); }, 1000);
 
                             $('.speed').prop('disabled', true);
                             $(this).text(i18n.getMessage('loggingStop'));
@@ -95,7 +123,13 @@ loggingTab.initialize = function (callback) {
                             GUI.log(i18n.getMessage('loggingErrorOneProperty'));
                         }
                     } else {
-                        interval.killAll(['global_data_refresh', 'msp-load-update', 'ltm-connection-check']);
+                        self.stopping = true;
+                        self.poller?.cancel();
+                        interval.remove('log_data_poll');
+                        interval.remove('write_data');
+                        try { await flushLogBuffer(); } catch { /* Reported by the writer. */ }
+                        self.stopping = false;
+                        self.poller = null;
 
                         $('.speed').prop('disabled', false);
                         $(this).text(i18n.getMessage('loggingStart'));
@@ -113,117 +147,15 @@ loggingTab.initialize = function (callback) {
     }
 
     function print_head() {
-        var head = "timestamp";
-
-        for (var i = 0; i < requested_properties.length; i++) {
-            switch (requested_properties[i]) {
-                case 'MSP_RAW_IMU':
-                    head += ',' + 'gyroscopeX';
-                    head += ',' + 'gyroscopeY';
-                    head += ',' + 'gyroscopeZ';
-
-                    head += ',' + 'accelerometerX';
-                    head += ',' + 'accelerometerY';
-                    head += ',' + 'accelerometerZ';
-
-                    head += ',' + 'magnetometerX';
-                    head += ',' + 'magnetometerY';
-                    head += ',' + 'magnetometerZ';
-                    break;
-                case 'MSP_ATTITUDE':
-                    head += ',' + 'kinematicsX';
-                    head += ',' + 'kinematicsY';
-                    head += ',' + 'kinematicsZ';
-                    break;
-                case 'MSP_ALTITUDE':
-                    head += ',' + 'altitude';
-                    break;
-                case 'MSP_RAW_GPS':
-                    head += ',' + 'gpsFix';
-                    head += ',' + 'gpsNumSat';
-                    head += ',' + 'gpsLat';
-                    head += ',' + 'gpsLon';
-                    head += ',' + 'gpsAlt';
-                    head += ',' + 'gpsSpeed';
-                    head += ',' + 'gpsGroundCourse';
-                    break;
-                case 'MSP_ANALOG':
-                    head += ',' + 'voltage';
-                    head += ',' + 'amperage';
-                    head += ',' + 'mAhdrawn';
-                    head += ',' + 'rssi';
-                    break;
-                case 'MSP_RC':
-                    for (var chan = 0; chan < FC.RC.active_channels; chan++) {
-                        head += ',' + 'RC' + chan;
-                    }
-                    break;
-                case 'MSP_MOTOR':
-                    for (var motor = 0; motor < FC.MOTOR_DATA.length; motor++) {
-                        head += ',' + 'Motor' + motor;
-                    }
-                    break;
-                case 'MSP_DEBUG':
-                    for (var debug = 0; debug < FC.SENSOR_DATA.debug.length; debug++) {
-                        head += ',' + 'Debug' + debug;
-                    }
-                    break;
-            }
-        }
-        log_buffer.push(head);
+        log_buffer.push(['timestamp', ...legacySchema.headers, ...csvSchema.headers].join(','));
     }
 
-    function crunch_data() {
-        var sample = millitime();
-
-        for (var i = 0; i < requested_properties.length; i++) {
-            switch (requested_properties[i]) {
-                case 'MSP_RAW_IMU':
-                    sample += ',' + FC.SENSOR_DATA.gyroscope;
-                    sample += ',' + FC.SENSOR_DATA.accelerometer;
-                    sample += ',' + FC.SENSOR_DATA.magnetometer;
-                    break;
-                case 'MSP_ATTITUDE':
-                    sample += ',' + FC.SENSOR_DATA.kinematics[0];
-                    sample += ',' + FC.SENSOR_DATA.kinematics[1];
-                    sample += ',' + FC.SENSOR_DATA.kinematics[2];
-                    break;
-                case 'MSP_ALTITUDE':
-                    sample += ',' + FC.SENSOR_DATA.altitude;
-                    break;
-                case 'MSP_RAW_GPS':
-                    sample += ',' + FC.GPS_DATA.fix;
-                    sample += ',' + FC.GPS_DATA.numSat;
-                    sample += ',' + (FC.GPS_DATA.lat / 10000000);
-                    sample += ',' + (FC.GPS_DATA.lon / 10000000);
-                    sample += ',' + FC.GPS_DATA.alt;
-                    sample += ',' + FC.GPS_DATA.speed;
-                    sample += ',' + FC.GPS_DATA.ground_course;
-                    break;
-                case 'MSP_ANALOG':
-                    sample += ',' + FC.ANALOG.voltage;
-                    sample += ',' + FC.ANALOG.amperage;
-                    sample += ',' + FC.ANALOG.mAhdrawn;
-                    sample += ',' + FC.ANALOG.rssi;
-                    break;
-                case 'MSP_RC':
-                    for (var chan = 0; chan < FC.RC.active_channels; chan++) {
-                        sample += ',' + FC.RC.channels[chan];
-                    }
-                    break;
-                case 'MSP_MOTOR':
-                    sample += ',' + FC.MOTOR_DATA;
-                    break;
-                case 'MSP_DEBUG':
-                    sample += ',' + FC.SENSOR_DATA.debug;
-                    break;
-            }
-        }
-
-        log_buffer.push(sample);
+    function crunch_data(snapshot, successful) {
+        log_buffer.push([millitime(), ...legacySchema.values(successful), ...csvSchema.values(snapshot)].join(','));
     }
 
     function prepare_file() {
+        if (self.poller || self.stopping) return;
         // create or load the file
 
         const date = new Date();
@@ -232,8 +164,8 @@ loggingTab.initialize = function (callback) {
                 + zeroPad(date.getSeconds(), 2);
 
         var options = {
-            defaultPath: filename,
-            filters: [ { name: "TXT file", extensions: ['txt'] } ]
+            defaultPath: filename + '.csv',
+            filters: [ { name: "CSV", extensions: ['csv'] }, { name: "TXT", extensions: ['txt'] } ]
         };
         dialog.showSaveDialog(options).then(result => {
             if (result.canceled) {
@@ -254,7 +186,7 @@ loggingTab.initialize = function (callback) {
 };
 
 loggingTab.cleanup = function (callback) {
-    if (callback) callback();
+    Promise.resolve(loggingTab.finishLogging?.()).catch(error=>console.error('Final sensor CSV flush failed:', error)).finally(()=>{ if (callback) callback(); });
 };
 
 export default loggingTab;

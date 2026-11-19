@@ -6933,5 +6933,41 @@
     },
     "configurationMultiImuTip": {
         "message": "Одновременный опрос акселерометров и гироскопов нескольких IMU с адаптивным доверием. Остальные типы акселерометров отображаются в скобках рядом с «Акселерометр». После «Сохранить и перезагрузить» выполните шестипозиционную калибровку акселерометров."
+    },
+    "sensorsMultiAltitude": {
+        "message": "Высота (м)"
+    },
+    "sensorsMultiPressure": {
+        "message": "Давление (Па)"
+    },
+    "sensorsMultiTrust": {
+        "message": "Доверие (%)"
+    },
+    "sensorsMultiState": {
+        "message": "Состояние"
+    },
+    "sensorsMultiNoData": {
+        "message": "Нет данных"
+    },
+    "sensorsMultiUncalibrated": {
+        "message": "Не откалиброван"
+    },
+    "sensorsMultiValid": {
+        "message": "Данные есть"
+    },
+    "sensorsMultiGyroTitle": {
+        "message": "Гироскоп $1 · $2 (°/с)"
+    },
+    "sensorsMultiAccTitle": {
+        "message": "Акселерометр $1 · $2 (g)"
+    },
+    "loggingMultiImuColumns": {
+        "message": "Общие значения гироскопа, акселерометра и магнитометра, а также измерения, тип, доверие, корректность и возраст данных каждого IMU."
+    },
+    "loggingMultiBaroColumns": {
+        "message": "Расчётная высота, а также давление, температура, высота, доверие, корректность и возраст данных каждого барометра."
+    },
+    "loggingSensorWriteFailed": {
+        "message": "Не удалось записать CSV с датчиками. Запись остановлена; проверьте папку назначения и свободное место."
     }
 }

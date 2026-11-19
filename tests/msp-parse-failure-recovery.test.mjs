@@ -142,6 +142,7 @@ const inertGeozoneUrl = dataModule(`
 `);
 
 const realMspHelperUrl = rewriteAndWrite('js/msp/MSPHelper.js', [
+    [/^import \{ parseMultiSensorTelemetry \} from '\.\.\/multiSensorTelemetry\.js';$/m, `import { parseMultiSensorTelemetry } from '${pathToFileURL(join(repoRoot, 'js/multiSensorTelemetry.js')).href}';`, 'multi sensor telemetry parser'],
     [/^import \{ parseMultiSensorInfo \} from '\.\.\/multiSensorInfo\.js';$/m, `import { parseMultiSensorInfo } from '${pathToFileURL(join(repoRoot, 'js/multiSensorInfo.js')).href}';`, 'multi sensor parser'],
     [/^import semver from 'semver';$/m, `import semver from '${inertDefaultUrl}';`, "import semver"],
     [/^import '\.\/\.\.\/injected_methods';$/m, `import '${realInjectedMethodsUrl}';`, "import injected_methods"],

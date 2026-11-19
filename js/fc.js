@@ -72,6 +72,7 @@ var FC = {
     FILTER_CONFIG: null,
     SENSOR_STATUS: null,
     SENSOR_CONFIG: null,
+    MULTI_SENSOR_STATE: null,
     NAV_POSHOLD: null,
     CALIBRATION_DATA: null,
     POSITION_ESTIMATOR: null,
@@ -159,6 +160,7 @@ var FC = {
             flowHwStatus: 0
         };
 
+        this.MULTI_SENSOR_STATE = null;
         this.SENSOR_CONFIG = {
             accelerometer: 0,
             barometer: 0,

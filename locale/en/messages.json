@@ -7967,5 +7967,41 @@
     },
     "configurationMultiImuTip": {
         "message": "Read accelerometers and gyroscopes from multiple IMUs concurrently using adaptive confidence. Other detected accelerometer types appear in parentheses next to Accelerometer. Apply with Save and Reboot, then perform six-position accelerometer calibration."
+    },
+    "sensorsMultiAltitude": {
+        "message": "Height (m)"
+    },
+    "sensorsMultiPressure": {
+        "message": "Pressure (Pa)"
+    },
+    "sensorsMultiTrust": {
+        "message": "Trust (%)"
+    },
+    "sensorsMultiState": {
+        "message": "State"
+    },
+    "sensorsMultiNoData": {
+        "message": "No data"
+    },
+    "sensorsMultiUncalibrated": {
+        "message": "Uncalibrated"
+    },
+    "sensorsMultiValid": {
+        "message": "Valid"
+    },
+    "sensorsMultiGyroTitle": {
+        "message": "Gyroscope $1 · $2 (°/s)"
+    },
+    "sensorsMultiAccTitle": {
+        "message": "Accelerometer $1 · $2 (g)"
+    },
+    "loggingMultiImuColumns": {
+        "message": "Combined gyro/accel/mag plus measurements, type, trust, validity and age for each detected IMU."
+    },
+    "loggingMultiBaroColumns": {
+        "message": "Estimated altitude plus pressure, temperature, height, trust, validity and age for each detected barometer."
+    },
+    "loggingSensorWriteFailed": {
+        "message": "Could not write the sensor CSV file. Recording has stopped; check the destination and available disk space."
     }
 }

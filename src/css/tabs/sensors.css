@@ -177,3 +177,24 @@
 .tab-sensors a.debug-trace:hover {
     text-decoration: underline;
 }
+.tab-sensors .multi-sensor-control {
+    height: auto;
+    min-height: 140px;
+}
+.tab-sensors .multi-sensor-control dt { width: auto; }
+.tab-sensors .multi-sensor-control dd { overflow-wrap: anywhere; }
+.tab-sensors .multi-sensor-control .title { overflow-wrap: anywhere; }
+
+.tab-sensors .multi-sensor-control dl {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px;
+    float: none;
+}
+.tab-sensors .multi-sensor-control dt,
+.tab-sensors .multi-sensor-control dd {
+    float: none;
+    width: auto;
+    height: auto;
+    line-height: normal;
+}

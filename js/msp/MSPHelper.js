@@ -9,6 +9,7 @@ import MSP from './../msp';
 import MSPCodes from './MSPCodes';
 import FC from './../fc';
 import { parseMultiSensorInfo } from '../multiSensorInfo.js';
+import { parseMultiSensorTelemetry } from '../multiSensorTelemetry.js';
 import VTX from './../vtx';
 import mspQueue from './../serial_queue';
 
@@ -1372,6 +1373,10 @@ var mspHelper = (function () {
 
             case MSPCodes.MSP_SET_PID_ADVANCED:
                 console.log("PID advanced saved");
+                break;
+
+            case MSPCodes.MSP2_INAV_MULTI_SENSOR_STATE:
+                FC.MULTI_SENSOR_STATE = dataHandler.unsupported ? null : parseMultiSensorTelemetry(data);
                 break;
 
             case MSPCodes.MSP_SENSOR_CONFIG:

@@ -11,10 +11,14 @@ import interval from './../js/intervals';
 import i18n from './../js/localization';
 import BitHelper from './../js/bitHelper';
 import store from '../js/store';
+import { readMultiSensorTelemetry, multiSensorGraphSeries } from '../js/multiSensorTelemetry.js';
 
 const sensorsTab = {};
 sensorsTab.initialize = function (callback) {
     var self = this;
+    self.pollEpoch = 0;
+    self.active = true;
+    self.multiPullBusy = false;
 
     if (GUI.active_tab !== this) {
         GUI.active_tab = this;
@@ -111,6 +115,7 @@ sensorsTab.initialize = function (callback) {
             .tickFormat(function (d) {return d;});
 
         helpers.line = d3.line()
+            .defined(point => Number.isFinite(point[1]))
             .x(function (d) {return helpers.widthScale(d[0]);})
             .y(function (d) {return helpers.heightScale(d[1]);});
 
@@ -137,8 +142,8 @@ sensorsTab.initialize = function (callback) {
 
         var group = svg.select("g.data");
         var lines = group.selectAll("path").data(data, function (d, i) {return i;});
-        var newLines = lines.enter().append("path").attr("class", "line");
-        lines.attr('d', graphHelpers.line);
+        lines.exit().remove();
+        lines.enter().append("path").attr("class", "line").merge(lines).attr('d', graphHelpers.line);
     }
 
     function plot_gyro(enable) {
@@ -204,7 +209,7 @@ sensorsTab.initialize = function (callback) {
             $('.wrapper.debug').hide();
         }
     }
-    import('./sensors.html?raw').then(({default: html}) => GUI.load(html, function load_html() {
+    const loadSensorsHtml = () => import('./sensors.html?raw').then(({default: html}) => GUI.load(html, function load_html() {
         // translate to user-selected language
        i18n.localize();;
 
@@ -344,6 +349,44 @@ sensorsTab.initialize = function (callback) {
             initGraphHelpers('#debug8', samples_debug_i)
         ];
 
+        const multiGraphs = new Map();
+        function updateMultiGraphs(snapshot, kinds = ['gyro', 'acc', 'baro']) {
+            const scaleOf = kind => kind === 'gyro' ? Number($('.tab-sensors select[name="gyro_scale"]').val()) : Number($('.tab-sensors select[name="accel_scale"]').val());
+            for (const kind of kinds) {
+                const group = kind === 'acc' ? 'accel' : kind === 'baro' ? 'altitude' : 'gyro';
+                const series = multiSensorGraphSeries(snapshot, kind);
+                const current = new Map(series.map(source => [source.key, source]));
+                for (const source of series) if (!multiGraphs.has(source.key)) {
+                    const id = 'multi-sensor-' + source.key;
+                    const $card = $('<div class="wrapper multi-sensor-card"><div class="gui_box grey"><div class="plot_control multi-sensor-control"><div class="title"></div><dl></dl></div><svg><g class="grid x" transform="translate(40,120)"></g><g class="grid y" transform="translate(40,10)"></g><g class="data" transform="translate(41,10)"></g><g class="axis x" transform="translate(40,120)"></g><g class="axis y" transform="translate(40,10)"></g></svg><div class="clear-both"></div></div></div>').addClass(group);
+                    $card.find('svg').attr('id', id);
+                    $card.find('.title').text(kind === 'baro' ? source.name : i18n.getMessage(kind === 'gyro' ? 'sensorsMultiGyroTitle' : 'sensorsMultiAccTitle', [source.index + 1, source.name]));
+                    const labels = kind === 'baro' ? [i18n.getMessage('sensorsMultiAltitude'), i18n.getMessage('sensorsMultiPressure')] : ['X:', 'Y:', 'Z:'];
+                    labels.push(i18n.getMessage('sensorsMultiTrust'), i18n.getMessage('sensorsMultiState'));
+                    labels.forEach(label => $card.find('dl').append($('<dt>').text(label), $('<dd class="multi-sensor-value">').text('—')));
+                    $('.wrapper.' + group).last().after($card);
+                    const checkedName = kind === 'acc' ? 'accel_on' : kind === 'baro' ? 'baro_on' : 'gyro_on';
+                    $card.toggle($('.tab-sensors input[name="' + checkedName + '"]').prop('checked'));
+                    const helper = initGraphHelpers('#' + id, 0, kind === 'baro' ? undefined : [-scaleOf(kind), scaleOf(kind)]);
+                    multiGraphs.set(source.key, { kind, card: $card, helper, data: initDataArray(kind === 'baro' ? 1 : 3), count: 0 });
+                }
+                for (const [key, graph] of multiGraphs) if (graph.kind === kind) {
+                    const source = current.get(key);
+                    if (kind !== 'baro') graph.helper.heightScale.domain([-scaleOf(kind), scaleOf(kind)]);
+                    updateGraphHelperSize(graph.helper);
+                    const values = source?.values || new Array(kind === 'baro' ? 1 : 3).fill(NaN);
+                    graph.count = addSampleToData(graph.data, graph.count, values);
+                    drawGraph(graph.helper, graph.data, graph.count);
+                    const display = kind === 'baro' ? [values[0], source?.pressurePa ?? NaN] : [...values];
+                    display.push(source ? source.trust / 10 : NaN);
+                    const status = !source?.valid ? 'sensorsMultiNoData' : !source.calibrated ? 'sensorsMultiUncalibrated' : 'sensorsMultiValid';
+                    graph.card.find('dd').each(function (index) {
+                        $(this).text(index === display.length ? i18n.getMessage(status) : Number.isFinite(display[index]) ? display[index].toFixed(kind === 'baro' && index === 1 ? 0 : 2) : '—');
+                    });
+                }
+            }
+        }
+
         var raw_data_text_ements = {
             x: [],
             y: [],
@@ -392,6 +435,9 @@ sensorsTab.initialize = function (callback) {
         });
         
         function startPolling() {
+            const epoch = ++self.pollEpoch;
+            const isCurrent = () => self.active && self.pollEpoch === epoch && GUI.active_tab === sensorsTab;
+            const multiDrawAt = { gyro: 0, acc: 0, baro: 0 };
             // if any of the select fields change value, all of the select values are grabbed
             // and timers are re-initialized with the new settings
             var rates = {
@@ -433,6 +479,28 @@ sensorsTab.initialize = function (callback) {
             // timer initialization
             interval.killAll(['status_pull', 'global_data_refresh', 'msp-load-update', 'ltm-connection-check']);
 
+            const info = FC.SENSOR_CONFIG.multiSensors;
+            if (info?.telemetrySupported && ((info.imuEnabled && (checkboxes[0] || checkboxes[1])) || (info.baroEnabled && checkboxes[3]))) {
+                const requestedRates = [];
+                if (info.imuEnabled && checkboxes[0]) requestedRates.push(rates.gyro);
+                if (info.imuEnabled && checkboxes[1]) requestedRates.push(rates.accel);
+                if (info.baroEnabled && checkboxes[3]) requestedRates.push(rates.baro);
+                // One shared request, capped at 20 Hz so slow serial links remain usable.
+                interval.add('multi_sensor_pull', async function () {
+                    if (self.multiPullBusy || !isCurrent()) return;
+                    self.multiPullBusy = true;
+                    try {
+                        const snapshot = await readMultiSensorTelemetry(MSP);
+                        if (!isCurrent()) return;
+                        const now = Date.now(), kinds = [];
+                        if (info.imuEnabled && checkboxes[0] && now - multiDrawAt.gyro >= rates.gyro) { kinds.push('gyro'); multiDrawAt.gyro = now; }
+                        if (info.imuEnabled && checkboxes[1] && now - multiDrawAt.acc >= rates.accel) { kinds.push('acc'); multiDrawAt.acc = now; }
+                        if (info.baroEnabled && checkboxes[3] && now - multiDrawAt.baro >= rates.baro) { kinds.push('baro'); multiDrawAt.baro = now; }
+                        updateMultiGraphs(snapshot, kinds);
+                    } finally { self.multiPullBusy = false; }
+                }, Math.max(50, Math.min(...requestedRates)), true);
+            }
+
             // data pulling timers
             if (checkboxes[0] || checkboxes[1] || checkboxes[2]) {
                 interval.add('IMU_pull', function () {
@@ -471,6 +539,7 @@ sensorsTab.initialize = function (callback) {
             }
 
             function update_imu_graphs() {
+                if (!isCurrent()) return;
                 if (checkboxes[0]) {
                     updateGraphHelperSize(gyroHelpers);
 
@@ -503,6 +572,7 @@ sensorsTab.initialize = function (callback) {
             }
 
             function update_altitude_graph() {
+                if (!isCurrent()) return;
                 updateGraphHelperSize(altitudeHelpers);
                 samples_altitude_i = addSampleToData(altitude_data, samples_altitude_i, [FC.SENSOR_DATA.altitude, FC.SENSOR_DATA.barometer]);
                 drawGraph(altitudeHelpers, altitude_data, samples_altitude_i);
@@ -556,9 +626,15 @@ sensorsTab.initialize = function (callback) {
 
         GUI.content_ready(callback);
     }));
+    MSP.send_message(MSPCodes.MSP_SENSOR_CONFIG, false, false, function () {
+        if (self.active && GUI.active_tab === sensorsTab) loadSensorsHtml();
+    });
 };
 
 sensorsTab.cleanup = function (callback) {
+    sensorsTab.active = false;
+    sensorsTab.pollEpoch++;
+    interval.remove('multi_sensor_pull');
     CONFIGURATOR.connection.emptyOutputBuffer();
 
     if (callback) callback();
