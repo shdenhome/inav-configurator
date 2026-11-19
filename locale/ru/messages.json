@@ -6969,5 +6969,14 @@
     },
     "loggingSensorWriteFailed": {
         "message": "Не удалось записать CSV с датчиками. Запись остановлена; проверьте папку назначения и свободное место."
+    },
+    "sensorAccelerometer2": {
+        "message": "Акселерометр 2"
+    },
+    "sensorAccelerometer3": {
+        "message": "Акселерометр 3"
+    },
+    "sensorBarometer2": {
+        "message": "Барометр 2"
     }
 }

@@ -8003,5 +8003,14 @@
     },
     "loggingSensorWriteFailed": {
         "message": "Could not write the sensor CSV file. Recording has stopped; check the destination and available disk space."
+    },
+    "sensorAccelerometer2": {
+        "message": "Accelerometer 2"
+    },
+    "sensorAccelerometer3": {
+        "message": "Accelerometer 3"
+    },
+    "sensorBarometer2": {
+        "message": "Barometer 2"
     }
 }

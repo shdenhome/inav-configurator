@@ -92,16 +92,19 @@ function bindMztcPresetSelector() {
     });
 }
 
-function updateMultiSensorLabels() {
+function updateMultiSensorFields() {
     const info = FC.SENSOR_CONFIG.multiSensors;
-    for (const [selectId, labelId, enabled, hardware, primaryIndex] of [
-        ['sensor-acc', 'multi-acc-types', $('#multi-imu-enabled').prop('checked'), info?.accelerometers || [], info?.primaryImuTag],
-        ['sensor-baro', 'multi-baro-types', $('#multi-baro-enabled').prop('checked'), info?.barometers || [], info?.barometers.indexOf(info.primaryBarometer)],
+    for (const [selectId, fieldIds, enabled, hardware, primaryIndex] of [
+        ['sensor-acc', ['multi-acc-2', 'multi-acc-3'], $('#multi-imu-enabled').prop('checked'), info?.accelerometers || [], info?.primaryImuTag],
+        ['sensor-baro', ['multi-baro-2'], $('#multi-baro-enabled').prop('checked'), info?.barometers || [], info?.barometers.indexOf(info.primaryBarometer)],
     ]) {
         const $select = $('#' + selectId);
         const names = $select.data('setting-info')?.table?.values || [];
         const otherNames = enabled ? remainingSensorNames(hardware, $select.val(), primaryIndex, names) : [];
-        $('#' + labelId).text(otherNames.length ? ' (' + otherNames.join(', ') + ')' : '');
+        fieldIds.forEach((id, index) => {
+            const name = otherNames[index] || '';
+            $('#' + id).val(name).closest('.multi-sensor-field').toggle(Boolean(name));
+        });
     }
 }
 
@@ -428,8 +431,8 @@ configurationTab.initialize = function (callback, scrollPosition) {
         // Wait for settings to load before triggering change event
         settingsPromise.then(function() {
             $i2cSpeed.trigger('change');
-            $('#sensor-acc, #sensor-baro, #multi-imu-enabled, #multi-baro-enabled').on('change', updateMultiSensorLabels);
-            updateMultiSensorLabels();
+            $('#sensor-acc, #sensor-baro, #multi-imu-enabled, #multi-baro-enabled').on('change', updateMultiSensorFields);
+            updateMultiSensorFields();
             $('#vbat_meter_type, #current_meter_type').on('change', updateIna226SettingsVisibility);
             updateIna226SettingsVisibility();
             updateMztcSettingsVisibility();

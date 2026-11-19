@@ -37,3 +37,9 @@ states, CSV shape, response order, cancellation and file-write order/errors.
 The complete Configurator test suite passes (413 cases). Actual connected UI,
 CSV recording and on-board Blackbox tests remain bench acceptance work. No
 packaged build is performed by this change.
+
+In Configuration → Sensors and buses, additional detected accelerometers and
+barometers appear in separate read-only fields immediately under the primary
+selector, styled like the battery-current readout. No type names are appended
+to labels. The extra rows follow the selected type and hide when the associated
+multi mode is off or a source is absent; the primary selectors remain editable.
