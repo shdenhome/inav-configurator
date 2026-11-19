@@ -8,6 +8,7 @@ import i18n from './../localization';
 import MSP from './../msp';
 import MSPCodes from './MSPCodes';
 import FC from './../fc';
+import { parseMultiSensorInfo } from '../multiSensorInfo.js';
 import VTX from './../vtx';
 import mspQueue from './../serial_queue';
 
@@ -1380,6 +1381,7 @@ var mspHelper = (function () {
                 FC.SENSOR_CONFIG.pitot = data.getUint8(3, true);
                 FC.SENSOR_CONFIG.rangefinder = data.getUint8(4, true);
                 FC.SENSOR_CONFIG.opflow = data.getUint8(5, true);
+                FC.SENSOR_CONFIG.multiSensors = parseMultiSensorInfo(data);
                 break;
 
             case MSPCodes.MSP_SET_SENSOR_CONFIG:

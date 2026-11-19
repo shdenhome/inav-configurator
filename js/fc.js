@@ -165,7 +165,8 @@ var FC = {
             magnetometer: 0,
             pitot: 0,
             rangefinder: 0,
-            opflow: 0
+            opflow: 0,
+            multiSensors: null
         };
 
         this.CONFIG = {

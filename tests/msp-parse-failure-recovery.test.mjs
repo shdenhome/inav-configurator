@@ -142,6 +142,7 @@ const inertGeozoneUrl = dataModule(`
 `);
 
 const realMspHelperUrl = rewriteAndWrite('js/msp/MSPHelper.js', [
+    [/^import \{ parseMultiSensorInfo \} from '\.\.\/multiSensorInfo\.js';$/m, `import { parseMultiSensorInfo } from '${pathToFileURL(join(repoRoot, 'js/multiSensorInfo.js')).href}';`, 'multi sensor parser'],
     [/^import semver from 'semver';$/m, `import semver from '${inertDefaultUrl}';`, "import semver"],
     [/^import '\.\/\.\.\/injected_methods';$/m, `import '${realInjectedMethodsUrl}';`, "import injected_methods"],
     [/^import GUI from '\.\/\.\.\/gui';$/m, `import GUI from '${guiStubUrl}';`, "import GUI"],
@@ -732,4 +733,19 @@ test('sendLedStripConfig() stops mid-chain when the queue drops one LED\'s write
 
     assert.equal(sentCodes.length, 1, 'a dropped write must not advance to the next LED');
     assert.equal(completed, false, 'onCompleteCallback must not run when an LED write never landed');
+});
+
+
+test('SENSOR_CONFIG preserves legacy values and reads the optional detected-sensor tail', () => {
+    FC.SENSOR_CONFIG = {};
+    const payload = [1,1,1,0,0,0,77,83,1,3,0,8,3,8,3,7,3];
+    let response = null;
+    mspHelper.handleResponse(makeDataHandler(MSPCodes.MSP_SENSOR_CONFIG, payload, resp => { response=resp; }));
+    assert.equal(FC.SENSOR_CONFIG.accelerometer,1);
+    assert.equal(FC.SENSOR_CONFIG.barometer,1);
+    assert.deepEqual(FC.SENSOR_CONFIG.multiSensors.accelerometers,[8,3,8]);
+    assert.deepEqual(FC.SENSOR_CONFIG.multiSensors.barometers,[3,7]);
+    assert.notEqual(response,null);
+    mspHelper.handleResponse(makeDataHandler(MSPCodes.MSP_SENSOR_CONFIG, payload.slice(0,6), () => {}));
+    assert.equal(FC.SENSOR_CONFIG.multiSensors,null);
 });

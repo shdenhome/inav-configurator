@@ -275,3 +275,8 @@ hr {
     margin-right: 72px;
     vertical-align: top;
 }
+
+.config-section .multi-sensor-types {
+    color: #888;
+    font-weight: normal;
+}

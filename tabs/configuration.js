@@ -11,6 +11,7 @@ import VTX from './../js/vtx';
 import i18n from './../js/localization';
 import Settings from './../js/settings';
 import features from './../js/feature_framework';
+import { remainingSensorNames } from '../js/multiSensorInfo.js';
 
 const configurationTab = {};
 
@@ -91,6 +92,19 @@ function bindMztcPresetSelector() {
     });
 }
 
+function updateMultiSensorLabels() {
+    const info = FC.SENSOR_CONFIG.multiSensors;
+    for (const [selectId, labelId, enabled, hardware, primaryIndex] of [
+        ['sensor-acc', 'multi-acc-types', $('#multi-imu-enabled').prop('checked'), info?.accelerometers || [], info?.primaryImuTag],
+        ['sensor-baro', 'multi-baro-types', $('#multi-baro-enabled').prop('checked'), info?.barometers || [], info?.barometers.indexOf(info.primaryBarometer)],
+    ]) {
+        const $select = $('#' + selectId);
+        const names = $select.data('setting-info')?.table?.values || [];
+        const otherNames = enabled ? remainingSensorNames(hardware, $select.val(), primaryIndex, names) : [];
+        $('#' + labelId).text(otherNames.length ? ' (' + otherNames.join(', ') + ')' : '');
+    }
+}
+
 configurationTab.initialize = function (callback, scrollPosition) {
 
     if (GUI.active_tab !== this) {
@@ -102,6 +116,7 @@ configurationTab.initialize = function (callback, scrollPosition) {
 
     var loadChain = [
         mspHelper.loadFeatures,
+        mspHelper.loadSensorConfig,
         mspHelper.loadSensorAlignment,
         mspHelper.loadAdvancedConfig,
         mspHelper.loadVTXConfig,
@@ -413,6 +428,8 @@ configurationTab.initialize = function (callback, scrollPosition) {
         // Wait for settings to load before triggering change event
         settingsPromise.then(function() {
             $i2cSpeed.trigger('change');
+            $('#sensor-acc, #sensor-baro, #multi-imu-enabled, #multi-baro-enabled').on('change', updateMultiSensorLabels);
+            updateMultiSensorLabels();
             $('#vbat_meter_type, #current_meter_type').on('change', updateIna226SettingsVisibility);
             updateIna226SettingsVisibility();
             updateMztcSettingsVisibility();
