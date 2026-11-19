@@ -7960,13 +7960,13 @@
         "message": "Multi barometer"
     },
     "configurationMultiBaroTip": {
-        "message": "Read detected barometers concurrently and combine their measurements using adaptive confidence. Other detected types appear in parentheses next to Barometer. Apply with Save and Reboot."
+        "message": "Read detected barometers concurrently and combine their measurements using adaptive confidence. The additional barometer appears in a separate field below the primary selector in Sensors and buses. Apply with Save and Reboot."
     },
     "configurationMultiImu": {
         "message": "Multi accelerometer"
     },
     "configurationMultiImuTip": {
-        "message": "Read accelerometers and gyroscopes from multiple IMUs concurrently using adaptive confidence. Other detected accelerometer types appear in parentheses next to Accelerometer. Apply with Save and Reboot, then perform six-position accelerometer calibration."
+        "message": "Read accelerometers and gyroscopes from multiple IMUs concurrently using adaptive confidence. Additional accelerometers appear in separate fields below the primary selector in Sensors and buses. After enabling and applying with Save and Reboot, perform six-position accelerometer calibration."
     },
     "sensorsMultiAltitude": {
         "message": "Height (m)"
