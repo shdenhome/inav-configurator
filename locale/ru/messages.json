@@ -6978,5 +6978,20 @@
     },
     "sensorBarometer2": {
         "message": "Барометр 2"
+    },
+    "servosCenterRange": {
+        "message": "Симметричный пересчёт Min/Max относительно Mid"
+    },
+    "servosCenterRangeNeeded": {
+        "message": "Диапазон не центрирован относительно Mid. Пересчитать Min/Max симметрично, при необходимости уменьшив размах. Подсветка не обозначает сохранение в EEPROM."
+    },
+    "servosCenterRangeCentered": {
+        "message": "Диапазон центрирован относительно Mid. Пересчитать Min/Max симметрично. Подсветка не обозначает сохранение в EEPROM."
+    },
+    "servosCenterRangeInvalid": {
+        "message": "Введите корректные Min, Mid и Max перед пересчётом диапазона."
+    },
+    "servosPulseWheelHelp": {
+        "message": "Колесо мыши: изменить это значение конфигурации на 1 мкс; Shift + колесо: на 10 мкс. Live Mode передаёт настройки контроллеру; для записи в EEPROM используйте сохранение."
     }
 }

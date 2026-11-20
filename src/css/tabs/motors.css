@@ -489,3 +489,20 @@
     border-radius: 3px;
     padding: 1px 2px;
 }
+
+#servo-config-table .servo-center-range {
+    font: inherit;
+    line-height: normal;
+    padding: .15em .55em;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    background: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+}
+#servo-config-table .servo-center-range:hover { background: #e2e2e2; }
+#servo-config-table .servo-center-range:focus-visible { outline: 2px solid #37a8db; outline-offset: 2px; }
+#servo-config-table .servo-center-range.is-asymmetric { background: #fff0c2; border-color: #b78713; }
+#servo-config-table .servo-center-range.is-asymmetric:hover { background: #ffe49b; }
+#servo-config-table .servo-center-range:disabled { opacity: .5; cursor: default; }
+#servo-config-table .center-range, #servo-config-table .servo-center-column { white-space: nowrap; text-align: center; }

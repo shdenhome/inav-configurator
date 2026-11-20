@@ -8012,5 +8012,20 @@
     },
     "sensorBarometer2": {
         "message": "Barometer 2"
+    },
+    "servosCenterRange": {
+        "message": "Center Min/Max around Mid"
+    },
+    "servosCenterRangeNeeded": {
+        "message": "The range is not centered around Mid. Recalculate Min/Max symmetrically, reducing the span if needed. This highlight does not indicate EEPROM save status."
+    },
+    "servosCenterRangeCentered": {
+        "message": "The range is centered around Mid. Recalculate Min/Max symmetrically. This highlight does not indicate EEPROM save status."
+    },
+    "servosCenterRangeInvalid": {
+        "message": "Enter valid Min, Mid and Max values before centering the range."
+    },
+    "servosPulseWheelHelp": {
+        "message": "Mouse wheel: adjust this configuration value by 1 µs; Shift + wheel: 10 µs. Live Mode transmits the configuration to the controller; use Save to store it in EEPROM."
     }
 }

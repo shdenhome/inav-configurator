@@ -14,6 +14,7 @@ import { mixer, PLATFORM } from './../js/model';
 import timeout from './../js/timeouts';
 import interval from './../js/intervals';
 import { getMotorPreviewLabels } from './../js/motorMixerPreview';
+import { bindServoPulseControls, createServoUpdateQueue } from '../js/servoOutputControls.js';
 
 /* Phase 0 of the firmware's calibration state machine, which is also how the
  * sequence is called off. Out here because cleanup() needs it too. */
@@ -92,10 +93,6 @@ outputsTab.initialize = function (callback) {
         mspHelper.save3dConfig,
         mspHelper.saveToEeprom
     ]);
-    saveChainer.setExitPoint(function () {
-        GUI.log(i18n.getMessage('eeprom_saved_ok'));
-        FC.MOTOR_RULES.cleanup();
-    });
 
     function load_html() {
         import('./outputs.html?raw').then(({default: html}) => GUI.load(html, Settings.processHtml(onLoad)));
@@ -580,7 +577,8 @@ outputsTab.initialize = function (callback) {
                     <td class="middle"><input type="number" min="500" max="2500" value="' + FC.SERVO_CONFIG[obj].middle + '" /></td>\
                     <td class="min"><input type="number" min="500" max="2500" value="' + FC.SERVO_CONFIG[obj].min + '" /></td>\
                     <td class="max"><input type="number" min="500" max="2500" value="' + FC.SERVO_CONFIG[obj].max + '" /></td>\
-                    <td class="text-center rate">\
+                    <td class="text-center center-range"><button type="button" class="servo-center-range">&#8596;</button></td>\
+                    <td class="text-center rate"></td>\
                     <td class="text-center reverse">\
                     </td>\
                 </tr> \
@@ -625,7 +623,8 @@ outputsTab.initialize = function (callback) {
             }
         }
 
-        function servos_update() {
+        function readServoConfiguration() {
+            servoControls.commitAll();
             $servoConfigTable.find('tr:not(".main")').each(function () {
                 var info = $(this).data('info');
 
@@ -648,9 +647,6 @@ outputsTab.initialize = function (callback) {
             FC.REVERSIBLE_MOTORS.deadband_low = parseInt($('#3ddeadbandlow').val());
             FC.REVERSIBLE_MOTORS.deadband_high = parseInt($('#3ddeadbandhigh').val());
             FC.REVERSIBLE_MOTORS.neutral = parseInt($('#3dneutral').val());
-
-            //Save configuration to FC
-            saveChainer.execute();
         }
 
         // drop previous table
@@ -670,35 +666,64 @@ outputsTab.initialize = function (callback) {
             $servoConfigTableContainer.show();
         }
 
-        // UI hooks for dynamically generated elements
-        $('table.directions select, table.directions input, #servo-config-table select, #servo-config-table input').on('change', function () {
-            if ($('div.live input').is(':checked')) {
-                // apply small delay as there seems to be some funky update business going wrong
-                timeout.add('servos_update', servos_update, 10);
-            }
-        });
-
-        $('a.update').on('click', function () {
-            features.reset();
-            features.fromUI($('.tab-motors'));
-            features.execute(servos_update);
-        });
-        $('a.save').on('click', function () {
-            saveChainer.setExitPoint(function () {
-                //noinspection JSUnresolvedVariable
-                GUI.log(i18n.getMessage('configurationEepromSaved'));
-
-                GUI.tab_switch_cleanup(function () {
-                    MSP.send_message(MSPCodes.MSP_SET_REBOOT, false, false, function () {
-                        GUI.log(i18n.getMessage('deviceRebooting'));
-                        GUI.handleReconnect($('.tab_outputs a'));
-                    });
+        const servoControls = bindServoPulseControls($servoConfigTable[0], servoConfigurationChanged, key => i18n.getMessage(key));
+        const servoUpdates = createServoUpdateQueue({
+            liveEnabled: () => $('div.live input').is(':checked'),
+            applyLive(done) {
+                readServoConfiguration();
+                mspHelper.sendServoConfigurations(done);
+            },
+            applySave(reboot, done) {
+                readServoConfiguration();
+                saveChainer.setExitPoint(function () {
+                    if (reboot) {
+                        servoUpdates.cancel();
+                        done();
+                        GUI.log(i18n.getMessage('configurationEepromSaved'));
+                        GUI.tab_switch_cleanup(function () {
+                            MSP.send_message(MSPCodes.MSP_SET_REBOOT, false, false, function () {
+                                GUI.log(i18n.getMessage('deviceRebooting'));
+                                GUI.handleReconnect($('.tab_outputs a'));
+                            });
+                        });
+                    } else {
+                        GUI.log(i18n.getMessage('eeprom_saved_ok'));
+                        FC.MOTOR_RULES.cleanup();
+                        done();
+                    }
                 });
-            });
+                saveChainer.execute();
+            },
+        });
+        self.cleanupServoControls = () => {
+            timeout.remove('servos_update');
+            servoUpdates.cancel();
+            servoControls.dispose();
+        };
+        function servoConfigurationChanged(input) {
+            servoControls.commitInput(input);
+            timeout.remove('servos_update');
+            if ($('div.live input').is(':checked')) {
+                timeout.add('servos_update', () => servoUpdates.live(), 10);
+            }
+        }
+        function saveServos(reboot) {
+            timeout.remove('servos_update');
             features.reset();
             features.fromUI($('.tab-motors'));
-            features.execute(servos_update);
+            features.execute(() => servoUpdates.save(reboot));
+        }
+
+        // Manual edits, wheel steps and centering share this change handler.
+        $('table.directions select, table.directions input, #servo-config-table select, #servo-config-table input').on('change', function () {
+            servoConfigurationChanged(this);
         });
+        $('div.live input').on('change', function () {
+            if (!$(this).is(':checked')) timeout.remove('servos_update');
+        });
+
+        $('a.update').on('click', function () { saveServos(false); });
+        $('a.save').on('click', function () { saveServos(true); });
 
     }
 
@@ -1053,6 +1078,8 @@ outputsTab.initialize = function (callback) {
 };
 
 outputsTab.cleanup = function (callback) {
+    outputsTab.cleanupServoControls?.();
+    outputsTab.cleanupServoControls = null;
     /*
      * Leaving the tab takes the Abort button with it, so the sequence it would
      * have stopped is called off here instead. The firmware is holding full
