@@ -17,6 +17,34 @@
     border-bottom: 1px solid #ddd;
 }
 
+/* Native selects have a right margin; read-only fields do not. Give sensor
+ * rows one control column and one label column, independent of control type. */
+.tab-configuration .sensors .select,
+.tab-configuration .sensors .number {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+}
+
+.tab-configuration .sensors .select select,
+.tab-configuration .sensors .number input {
+    box-sizing: border-box;
+    flex: 0 0 111px;
+    width: 111px;
+    margin: 0;
+}
+
+.tab-configuration .sensors .select label,
+.tab-configuration .sensors .number label {
+    margin-left: 0;
+    min-width: 0;
+}
+
+.tab-configuration .sensors .helpicon {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
 .tab-configuration .leftWrapper {
     float: left;
     width: calc(50% - 2em);
