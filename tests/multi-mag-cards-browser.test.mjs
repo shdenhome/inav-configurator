@@ -103,6 +103,8 @@ const a={uid:0x010d07,hardware:7,bus:1,address:13},b={uid:0x011e0b,hardware:11,b
 configurationMagInventory={sources:[a,b],referenceUid:0};updateMultiMagFields();
 check($('#multi-mag-fields input').length===1,'one additional uncalibrated device');
 check($('#multi-mag-2').val()==='QMC5883','LIS primary leaves QMC');check($('#multi-mag-2').prop('readOnly'),'read-only');
+const extraStyle=getComputedStyle($('#multi-mag-2').parent()[0]),normalStyle=getComputedStyle($('#sensor-mag').parent()[0]);
+for(const key of ['marginBottom','paddingBottom','borderBottomWidth'])check(extraStyle[key]===normalStyle[key],'matching sensor row '+key);
 check($('#multi-mag-2').attr('title')==='I2C1 / 0x0D','endpoint');check($('#multi-mag-fields label').text()==='Магнитометр 2','localized number');
 $('#sensor-mag').val('7');updateMultiMagFields();check($('#multi-mag-2').val()==='LIS3MDL','selected QMC leaves LIS');
 configurationMagInventory.sources.push({...b,uid:0x021e0b,bus:2});$('#sensor-mag').val('11');updateMultiMagFields();

@@ -9,6 +9,14 @@
     display: none !important;
 }
 
+/* Extra MAG rows are nested, so their last row still precedes the barometer.
+ * Keep the same separator and spacing as the surrounding sensor rows. */
+.tab-configuration #multi-mag-fields > .number:last-child {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
 .tab-configuration .leftWrapper {
     float: left;
     width: calc(50% - 2em);
