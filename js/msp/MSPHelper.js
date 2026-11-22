@@ -8,6 +8,7 @@ import i18n from './../localization';
 import MSP from './../msp';
 import MSPCodes from './MSPCodes';
 import FC from './../fc';
+import { parseMultiMagPage } from '../multiMagTelemetry.js';
 import { parseMultiSensorInfo } from '../multiSensorInfo.js';
 import { parseMultiSensorTelemetry } from '../multiSensorTelemetry.js';
 import VTX from './../vtx';
@@ -1373,6 +1374,10 @@ var mspHelper = (function () {
 
             case MSPCodes.MSP_SET_PID_ADVANCED:
                 console.log("PID advanced saved");
+                break;
+
+            case MSPCodes.MSP2_INAV_MULTI_MAG_STATE:
+                FC.MULTI_MAG_PAGE = dataHandler.unsupported ? null : parseMultiMagPage(data);
                 break;
 
             case MSPCodes.MSP2_INAV_MULTI_SENSOR_STATE:

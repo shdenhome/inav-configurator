@@ -8,6 +8,8 @@ export function parseMultiSensorInfo(data) {
         imuEnabled: Boolean(flags & 1),
         baroEnabled: Boolean(flags & 2),
         telemetrySupported: Boolean(flags & 4),
+        magSupported: Boolean(flags & 8),
+        magEnabled: Boolean(flags & 16),
         primaryImuTag: data.getUint8(10),
         accelerometers: [data.getUint8(11), data.getUint8(12), data.getUint8(13)],
         barometers: [data.getUint8(14), data.getUint8(15)],

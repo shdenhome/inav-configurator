@@ -11,6 +11,7 @@ import interval from './../js/intervals';
 import i18n from './../js/localization';
 import BitHelper from './../js/bitHelper';
 import store from '../js/store';
+import { readMultiMagTelemetry, multiMagSeries } from '../js/multiMagTelemetry.js';
 import { readMultiSensorTelemetry, multiSensorGraphSeries } from '../js/multiSensorTelemetry.js';
 
 const sensorsTab = {};
@@ -351,21 +352,23 @@ sensorsTab.initialize = function (callback) {
 
         const multiGraphs = new Map();
         function updateMultiGraphs(snapshot, kinds = ['gyro', 'acc', 'baro']) {
-            const scaleOf = kind => kind === 'gyro' ? Number($('.tab-sensors select[name="gyro_scale"]').val()) : Number($('.tab-sensors select[name="accel_scale"]').val());
+            const scaleOf = kind => Number($('.tab-sensors select[name="' + (kind === 'gyro' ? 'gyro_scale' : kind === 'mag' ? 'mag_scale' : 'accel_scale') + '"]').val());
             for (const kind of kinds) {
-                const group = kind === 'acc' ? 'accel' : kind === 'baro' ? 'altitude' : 'gyro';
-                const series = multiSensorGraphSeries(snapshot, kind);
+                const group = kind === 'acc' ? 'accel' : kind === 'baro' ? 'altitude' : kind === 'mag' ? 'mag' : 'gyro';
+                const series = kind === 'mag' ? multiMagSeries(snapshot) : multiSensorGraphSeries(snapshot, kind);
                 const current = new Map(series.map(source => [source.key, source]));
                 for (const source of series) if (!multiGraphs.has(source.key)) {
                     const id = 'multi-sensor-' + source.key;
                     const $card = $('<div class="wrapper multi-sensor-card"><div class="gui_box grey"><div class="plot_control multi-sensor-control"><div class="title"></div><dl></dl></div><svg><g class="grid x" transform="translate(40,120)"></g><g class="grid y" transform="translate(40,10)"></g><g class="data" transform="translate(41,10)"></g><g class="axis x" transform="translate(40,120)"></g><g class="axis y" transform="translate(40,10)"></g></svg><div class="clear-both"></div></div></div>').addClass(group);
                     $card.find('svg').attr('id', id);
-                    $card.find('.title').text(kind === 'baro' ? source.name : i18n.getMessage(kind === 'gyro' ? 'sensorsMultiGyroTitle' : 'sensorsMultiAccTitle', [source.index + 1, source.name]));
+                    if (kind === 'mag') $card.addClass('multi-mag-card');
+                    $card.find('.title').text(kind === 'mag' ? source.title + ' · ' + i18n.getMessage('multiMagUnits') : kind === 'baro' ? source.name : i18n.getMessage(kind === 'gyro' ? 'sensorsMultiGyroTitle' : 'sensorsMultiAccTitle', [source.index + 1, source.name]));
                     const labels = kind === 'baro' ? [i18n.getMessage('sensorsMultiAltitude'), i18n.getMessage('sensorsMultiPressure')] : ['X:', 'Y:', 'Z:'];
                     labels.push(i18n.getMessage('sensorsMultiTrust'), i18n.getMessage('sensorsMultiState'));
+                    if (kind === 'mag') labels.push(i18n.getMessage('multiMagRole'), i18n.getMessage('multiMagCalibration'), i18n.getMessage('multiMagOrientation'), i18n.getMessage('multiMagRaw'));
                     labels.forEach(label => $card.find('dl').append($('<dt>').text(label), $('<dd class="multi-sensor-value">').text('—')));
                     $('.wrapper.' + group).last().after($card);
-                    const checkedName = kind === 'acc' ? 'accel_on' : kind === 'baro' ? 'baro_on' : 'gyro_on';
+                    const checkedName = kind === 'acc' ? 'accel_on' : kind === 'baro' ? 'baro_on' : kind === 'mag' ? 'mag_on' : 'gyro_on';
                     $card.toggle($('.tab-sensors input[name="' + checkedName + '"]').prop('checked'));
                     const helper = initGraphHelpers('#' + id, 0, kind === 'baro' ? undefined : [-scaleOf(kind), scaleOf(kind)]);
                     multiGraphs.set(source.key, { kind, card: $card, helper, data: initDataArray(kind === 'baro' ? 1 : 3), count: 0 });
@@ -378,10 +381,14 @@ sensorsTab.initialize = function (callback) {
                     graph.count = addSampleToData(graph.data, graph.count, values);
                     drawGraph(graph.helper, graph.data, graph.count);
                     const display = kind === 'baro' ? [values[0], source?.pressurePa ?? NaN] : [...values];
-                    display.push(source ? source.trust / 10 : NaN);
-                    const status = !source?.valid ? 'sensorsMultiNoData' : !source.calibrated ? 'sensorsMultiUncalibrated' : 'sensorsMultiValid';
+                    display.push(source ? (kind === 'mag' ? source.confidence : source.trust) / 10 : NaN);
+                    const status = !source?.valid ? 'sensorsMultiNoData' : (kind === 'mag' ? !(source.flags & 8) : !source.calibrated) ? 'sensorsMultiUncalibrated' : 'sensorsMultiValid';
                     graph.card.find('dd').each(function (index) {
-                        $(this).text(index === display.length ? i18n.getMessage(status) : Number.isFinite(display[index]) ? display[index].toFixed(kind === 'baro' && index === 1 ? 0 : 2) : '—');
+                        if (kind === 'mag' && index >= 5) {
+                            const role = !source ? 'multiMagMissing' : source.flags & 64 ? 'multiMagFallback' : source.flags & 32 ? 'multiMagContributing' : 'multiMagExcluded';
+                            const calibration = ['multiMagCalNeeded','multiMagCalRunning','multiMagCalOk','multiMagCalFailed','multiMagCalMissing'][source?.calStatus ?? 4];
+                            $(this).text(index === 8 ? source ? source.raw.join(' / ') : '—' : index === 5 ? i18n.getMessage(role) : index === 6 ? i18n.getMessage(calibration) + (source?.failureCode ? ' #' + source.failureCode : '') : source && source.flags & 256 ? source.angles.map(v => (v / 10).toFixed(1)).join(' / ') + '° · ' + source.orientationConfidence + '%' : i18n.getMessage('multiMagOrientationUnknown'));
+                        } else $(this).text(index === display.length ? i18n.getMessage(status) : Number.isFinite(display[index]) ? display[index].toFixed(kind === 'baro' && index === 1 ? 0 : 2) : '—');
                     });
                 }
             }
@@ -480,6 +487,19 @@ sensorsTab.initialize = function (callback) {
             interval.killAll(['status_pull', 'global_data_refresh', 'msp-load-update', 'ltm-connection-check']);
 
             const info = FC.SENSOR_CONFIG.multiSensors;
+            if (info?.magSupported && info.magEnabled && checkboxes[2]) {
+                let magBusy = false;
+                interval.add('multi_mag_pull', async function () {
+                    if (magBusy || !isCurrent()) return;
+                    magBusy = true;
+                    try {
+                        const snapshot = await readMultiMagTelemetry(MSP);
+                        if (!isCurrent()) return;
+                        FC.MULTI_MAG_STATE = snapshot;
+                        updateMultiGraphs(snapshot, ['mag']);
+                    } finally { magBusy = false; }
+                }, Math.max(100, rates.mag), true);
+            }
             if (info?.telemetrySupported && ((info.imuEnabled && (checkboxes[0] || checkboxes[1])) || (info.baroEnabled && checkboxes[3]))) {
                 const requestedRates = [];
                 if (info.imuEnabled && checkboxes[0]) requestedRates.push(rates.gyro);
@@ -635,6 +655,7 @@ sensorsTab.cleanup = function (callback) {
     sensorsTab.active = false;
     sensorsTab.pollEpoch++;
     interval.remove('multi_sensor_pull');
+    interval.remove('multi_mag_pull');
     CONFIGURATOR.connection.emptyOutputBuffer();
 
     if (callback) callback();

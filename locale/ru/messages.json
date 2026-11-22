@@ -6993,5 +6993,71 @@
     },
     "servosPulseWheelHelp": {
         "message": "Колесо мыши: изменить это значение конфигурации на 1 мкс; Shift + колесо: на 10 мкс. Live Mode передаёт настройки контроллеру; для записи в EEPROM используйте сохранение."
+    },
+    "configurationMultiMag": {
+        "message": "Мульти магнитометр"
+    },
+    "configurationMultiMagTip": {
+        "message": "Одновременный опрос магнитометров с отдельной калибровкой, автоопределением ориентации и оценкой доверия. Примените с сохранением и перезагрузкой; затем откалибруйте компасы."
+    },
+    "multiMagUnits": {
+        "message": "нормированное поле"
+    },
+    "multiMagRole": {
+        "message": "Участие"
+    },
+    "multiMagCalibration": {
+        "message": "Калибровка"
+    },
+    "multiMagOrientation": {
+        "message": "Поворот / качество оценки"
+    },
+    "multiMagRaw": {
+        "message": "Сырые X/Y/Z"
+    },
+    "multiMagMissing": {
+        "message": "Нет свежих данных"
+    },
+    "multiMagFallback": {
+        "message": "РЕЗЕРВ — нулевое доверие"
+    },
+    "multiMagContributing": {
+        "message": "Участвует в среднем"
+    },
+    "multiMagExcluded": {
+        "message": "Исключён"
+    },
+    "multiMagCalNeeded": {
+        "message": "Требуется калибровка"
+    },
+    "multiMagCalRunning": {
+        "message": "Калибровка выполняется"
+    },
+    "multiMagCalOk": {
+        "message": "Калибровка успешна"
+    },
+    "multiMagCalFailed": {
+        "message": "Калибровка не удалась"
+    },
+    "multiMagOrientationUnknown": {
+        "message": "Ориентация не определена"
+    },
+    "multiMagCommunicationError": {
+        "message": "Нет достоверного ответа магнитометров. Завершение калибровки не подтверждено."
+    },
+    "multiMagCalInstructions": {
+        "message": "Вращайте аппарат по всем осям. Каждый магнитометр калибруется и определяет свою ориентацию независимо."
+    },
+    "multiMagCalFinished": {
+        "message": "Калибровка завершена. Проверьте результат каждого датчика."
+    },
+    "multiMagNoSources": {
+        "message": "Нет обнаруженных магнитометров."
+    },
+    "multiMagLegacyAlignmentNotice": {
+        "message": "В режиме нескольких магнитометров ориентация каждого компаса определяется отдельно при калибровке на вкладке «Калибровка». Общие настройки align_mag и мастер одиночного компаса к этому режиму не применяются. Ручная ориентация полётного контроллера остаётся доступной."
+    },
+    "multiMagCalMissing": {
+        "message": "Датчик недоступен при калибровке"
     }
 }

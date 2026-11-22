@@ -67,6 +67,7 @@ magnetometerTab.initialize = function (callback) {
     var loadChainer = new MSPChainerClass();
 
     var loadChain = [
+        mspHelper.loadSensorConfig,
         mspHelper.loadMixerConfig,
         mspHelper.loadBoardAlignment,
         // Needed by accAutoAlignButton's step-1 FC.getMagnetometerCalibrated() check --
@@ -155,20 +156,26 @@ magnetometerTab.initialize = function (callback) {
         mspHelper.saveBoardAlignment,
         // Magnetometer alignment
         function (callback) {
+            if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) { callback(); return; }
             let orientation_mag_e = $('select.magalign');
             FC.SENSOR_ALIGNMENT.align_mag = parseInt(orientation_mag_e.val());
             callback();
         },
-        mspHelper.saveSensorAlignment,
+        function (callback) {
+            if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) callback();
+            else mspHelper.saveSensorAlignment(callback);
+        },
         // Pitch/Roll/Yaw
         // Pitch and roll must be inverted - ???
         function (callback) {
+            if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) { callback(); return; }
             if (self.isSavePreset)
                 mspHelper.setSetting("align_mag_roll", 0, callback);
             else
                 mspHelper.setSetting("align_mag_roll", self.alignmentConfig.roll * 10, callback);
         },
         function (callback) {
+            if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) { callback(); return; }
             if (self.isSavePreset)
                 mspHelper.setSetting("align_mag_pitch", 0, callback);
             else
@@ -176,6 +183,7 @@ magnetometerTab.initialize = function (callback) {
 
         },
         function (callback) {
+            if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) { callback(); return; }
             if (self.isSavePreset)
                 mspHelper.setSetting("align_mag_yaw", 0, callback);
             else {
@@ -683,6 +691,14 @@ magnetometerTab.initialize = function (callback) {
             });
         }
 
+        if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) {
+            const notice = $('<div class="note"><p></p></div>');
+            notice.find('p').text(i18n.getMessage('multiMagLegacyAlignmentNotice'));
+            $('.tab-magnetometer .tab_title').after(notice);
+            $('.wizard-launch-box').hide();
+            $('#magalign').closest('.config-section').hide();
+        }
+
         interval.add('setup_data_pull_fast', get_fast_data, 40);
 
     // rad2degrees, snap45, buildRotationMatrix, applyRotation, calculateRawFromTransformed,
@@ -1056,6 +1072,7 @@ magnetometerTab.initialize = function (callback) {
     }
 
     function accAutoAlignButton(event) {
+        if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) { GUI.log(i18n.getMessage('multiMagLegacyAlignmentNotice')); return; }
         // Visual feedback so a slow step doesn't look unresponsive and invite repeated clicks.
         resetAlignButtons();
         $(event.target).css({ opacity: 0.5, pointerEvents: 'none' });

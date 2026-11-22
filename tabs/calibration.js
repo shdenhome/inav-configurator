@@ -10,11 +10,14 @@ import timeout from './../js/timeouts';
 import interval from './../js/intervals';
 import i18n from './../js/localization';
 import jBox from 'jbox';
+import { readMultiMagTelemetry, multiMagSeries, createMagCalibrationTracker } from '../js/multiMagTelemetry.js';
 
 const calibrationTab = {};
 
 // Module-scoped (not local to initialize()) so cleanup() below can close it too.
 let modalMagAlign;
+let multiMagModal;
+let multiMagCalibrationEpoch = 0;
 
 // Pure functions of their arguments -- module-scoped rather than redeclared on
 // every calibrationTab.initialize() call.
@@ -306,7 +309,48 @@ calibrationTab.initialize = function (callback) {
             $('#opflow_btn, #opflow-calibrated-data').css('pointer-events', 'none').css('opacity', '0.4');
         }
 
+        async function calibrateMultiMag(button) {
+            if (button.hasClass('disabled')) return;
+            button.addClass('disabled');
+            const epoch = ++multiMagCalibrationEpoch;
+            const baseline = await readMultiMagTelemetry(MSP);
+            if (epoch !== multiMagCalibrationEpoch) return;
+            if (!baseline) { button.removeClass('disabled'); GUI.log(i18n.getMessage('multiMagCommunicationError')); return; }
+            const tracker = createMagCalibrationTracker(baseline.calibrationRunId);
+            const content = $('<div><p></p><div class="multi-mag-calibration-status"></div></div>');
+            content.find('p').text(i18n.getMessage('multiMagCalInstructions'));
+            multiMagModal = new jBox('Modal', { width: 500, content, closeOnClick: false, closeOnEsc: true, closeButton: true }).open();
+            MSP.send_message(MSPCodes.MSP_MAG_CALIBRATION, false, false, function (response) {
+                if (epoch !== multiMagCalibrationEpoch) return;
+                if (!response) { button.removeClass('disabled'); multiMagModal.close(); GUI.log(i18n.getMessage('multiMagCommunicationError')); return; }
+                let busy = false;
+                interval.add('multi_mag_calibration_poll', async function () {
+                    if (busy || epoch !== multiMagCalibrationEpoch) return;
+                    busy = true;
+                    try {
+                        const snapshot = await readMultiMagTelemetry(MSP);
+                        if (epoch !== multiMagCalibrationEpoch) return;
+                        const progress = tracker(snapshot);
+                        content.find('.multi-mag-calibration-status').empty();
+                        for (const source of multiMagSeries(snapshot)) {
+                            const key = ['multiMagCalNeeded','multiMagCalRunning','multiMagCalOk','multiMagCalFailed','multiMagCalMissing'][source.calStatus];
+                            $('<p>').text(source.title + ': ' + i18n.getMessage(key) + (source.failureCode ? ' #' + source.failureCode : '') + (source.flags & 256 ? ' · ' + source.angles.map(v=>v/10).join(' / ') + '°' : '')).appendTo(content.find('.multi-mag-calibration-status'));
+                        }
+                        if (!snapshot) content.find('.multi-mag-calibration-status').text(i18n.getMessage('multiMagCommunicationError'));
+                        if (snapshot && !snapshot.sources.length) content.find('.multi-mag-calibration-status').text(i18n.getMessage('multiMagNoSources'));
+                        if (progress.done || progress.error) {
+                            interval.remove('multi_mag_calibration_poll'); button.removeClass('disabled');
+                            content.find('p').first().text(i18n.getMessage(progress.error ? 'multiMagCommunicationError' : 'multiMagCalFinished'));
+                            multiMagModal.options.closeOnClick = true;
+                            MSP.send_message(MSPCodes.MSP_CALIBRATION_DATA, false, false, updateSensorData);
+                        }
+                    } finally { busy = false; }
+                }, 300, true);
+            });
+        }
+
         $('#mag_btn').on('click', function () {
+            if (FC.SENSOR_CONFIG.multiSensors?.magSupported && FC.SENSOR_CONFIG.multiSensors.magEnabled) { calibrateMultiMag($(this)); return; }
             // Snapshot before the spin so we can tell whether the firmware's
             // auto-detect actually changed anything (see reportMagCalibrationOrientation).
             var magAlignBefore = FC.hasCalibrationOrientationDetection() ? getMagAlignmentSettings() : null;
@@ -417,6 +461,10 @@ calibrationTab.initialize = function (callback) {
 };
 
 calibrationTab.cleanup = function (callback) {
+    multiMagCalibrationEpoch++;
+    interval.remove('multi_mag_calibration_poll');
+    multiMagModal?.close();
+    multiMagModal = null;
     // reportMagCalibrationOrientation() can leave this open if the user switches tabs
     // before dismissing it -- without this, it stays visible over whatever tab they land on.
     if (modalMagAlign) {

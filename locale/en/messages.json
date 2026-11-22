@@ -8027,5 +8027,71 @@
     },
     "servosPulseWheelHelp": {
         "message": "Mouse wheel: adjust this configuration value by 1 µs; Shift + wheel: 10 µs. Live Mode transmits the configuration to the controller; use Save to store it in EEPROM."
+    },
+    "configurationMultiMag": {
+        "message": "Multi magnetometer"
+    },
+    "configurationMultiMagTip": {
+        "message": "Read magnetometers concurrently with individual calibration, automatic orientation and confidence. Apply with Save and Reboot, then calibrate the compasses."
+    },
+    "multiMagUnits": {
+        "message": "normalized field"
+    },
+    "multiMagRole": {
+        "message": "Participation"
+    },
+    "multiMagCalibration": {
+        "message": "Calibration"
+    },
+    "multiMagOrientation": {
+        "message": "Rotation / quality"
+    },
+    "multiMagRaw": {
+        "message": "Raw X/Y/Z"
+    },
+    "multiMagMissing": {
+        "message": "No fresh data"
+    },
+    "multiMagFallback": {
+        "message": "FALLBACK — zero confidence"
+    },
+    "multiMagContributing": {
+        "message": "Contributing"
+    },
+    "multiMagExcluded": {
+        "message": "Excluded"
+    },
+    "multiMagCalNeeded": {
+        "message": "Calibration required"
+    },
+    "multiMagCalRunning": {
+        "message": "Calibrating"
+    },
+    "multiMagCalOk": {
+        "message": "Calibration successful"
+    },
+    "multiMagCalFailed": {
+        "message": "Calibration failed"
+    },
+    "multiMagOrientationUnknown": {
+        "message": "Orientation unknown"
+    },
+    "multiMagCommunicationError": {
+        "message": "No reliable magnetometer response. Calibration completion is unconfirmed."
+    },
+    "multiMagCalInstructions": {
+        "message": "Rotate the aircraft about all axes. Each magnetometer calibrates and detects its orientation independently."
+    },
+    "multiMagCalFinished": {
+        "message": "Calibration finished. Check each source result."
+    },
+    "multiMagNoSources": {
+        "message": "No magnetometers detected."
+    },
+    "multiMagLegacyAlignmentNotice": {
+        "message": "In multi-magnetometer mode each compass detects its own orientation during calibration on the Calibration tab. Global align_mag settings and the single-compass wizard do not apply. Manual flight-controller board alignment remains available."
+    },
+    "multiMagCalMissing": {
+        "message": "Source unavailable during calibration"
     }
 }

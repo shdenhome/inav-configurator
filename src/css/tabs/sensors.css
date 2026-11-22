@@ -198,3 +198,8 @@
     height: auto;
     line-height: normal;
 }
+
+.tab-sensors .multi-mag-card .plot_control { width: 22em; }
+.tab-sensors .multi-mag-card svg { width: calc(100% - 23em); }
+.tab-sensors .multi-mag-card dt,
+.tab-sensors .multi-mag-card dd { overflow-wrap: anywhere; }

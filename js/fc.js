@@ -73,6 +73,8 @@ var FC = {
     SENSOR_STATUS: null,
     SENSOR_CONFIG: null,
     MULTI_SENSOR_STATE: null,
+    MULTI_MAG_PAGE: null,
+    MULTI_MAG_STATE: null,
     NAV_POSHOLD: null,
     CALIBRATION_DATA: null,
     POSITION_ESTIMATOR: null,
@@ -161,6 +163,7 @@ var FC = {
         };
 
         this.MULTI_SENSOR_STATE = null;
+        this.MULTI_MAG_PAGE = this.MULTI_MAG_STATE = null;
         this.SENSOR_CONFIG = {
             accelerometer: 0,
             barometer: 0,

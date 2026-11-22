@@ -6,7 +6,7 @@ const view = bytes => new DataView(Uint8Array.from(bytes).buffer);
 const names = {8:'ICM42605',3:'MPU6500'};
 const baroNames = {3:'MS5611',7:'SPL06'};
 test('multi-sensor tail parses active modes and physical tags', () => {
-    assert.deepEqual(parseMultiSensorInfo(view(packet)), {imuEnabled:true,baroEnabled:true,telemetrySupported:false,primaryImuTag:0,accelerometers:[8,3,8],barometers:[3,7],primaryBarometer:3});
+    assert.deepEqual(parseMultiSensorInfo(view(packet)), {imuEnabled:true,baroEnabled:true,telemetrySupported:false,magSupported:false,magEnabled:false,primaryImuTag:0,accelerometers:[8,3,8],barometers:[3,7],primaryBarometer:3});
 });
 test('legacy, truncated and unrelated sensor-config tails are ignored', () => {
     assert.equal(parseMultiSensorInfo(view(packet.slice(0,6))),null);
