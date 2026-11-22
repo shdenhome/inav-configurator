@@ -73,3 +73,13 @@ The multi-calibration UI timeout is 180 seconds: the firmware permits up to
 120 seconds of acquisition, with 60 seconds reserved for per-source orientation
 finalization and paged transport. A run still active after 120 seconds is not
 misreported as timed out.
+
+Configuration → Sensors and buses also lists the additional boot-detected
+magnetometers as read-only numbered rows below the primary selector. Inventory
+is fetched through the paged protocol after settings load, independently of
+calibration status. One matching selected physical source is omitted; other
+identical models are preserved. Endpoint details are available in the field
+title. Runtime-disabled/unsupported firmware shows no invented extra devices,
+and tab cleanup invalidates late inventory responses. The browser regression
+checks the reported QMC5883 0x0D + LIS3MDL 0x1E case, changing the selection,
+identical models on different buses and clearing the mode/inventory.

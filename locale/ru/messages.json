@@ -5000,6 +5000,9 @@
     "osdElement_FW_ALT_PID_OUTPUTS": {
         "message": "PID: высота (самолёт)"
     },
+    "sensorMagnetometerNumber": {
+        "message": "Магнитометр $1"
+    },
     "sensorMagnetometer": {
         "message": "Магнитометр"
     },

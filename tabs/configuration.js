@@ -12,8 +12,11 @@ import i18n from './../js/localization';
 import Settings from './../js/settings';
 import features from './../js/feature_framework';
 import { remainingSensorNames } from '../js/multiSensorInfo.js';
+import { readMultiMagTelemetry } from '../js/multiMagTelemetry.js';
 
 const configurationTab = {};
+let configurationEpoch = 0;
+let configurationMagInventory = null;
 
 function isIna226Selected($meterType) {
     const settingInfo = $meterType.data('setting-info');
@@ -92,6 +95,28 @@ function bindMztcPresetSelector() {
     });
 }
 
+function updateMultiMagFields() {
+    const $container = $('#multi-mag-fields').empty();
+    if (!$('#multi-mag-enabled').prop('checked') || !configurationMagInventory) return;
+    const sources = configurationMagInventory.sources;
+    const selectedType = Number($('#sensor-mag').val());
+    let primary = sources.findIndex(source => source.hardware === selectedType);
+    if (primary < 0) primary = sources.findIndex(source => source.uid === configurationMagInventory.referenceUid);
+    if (primary < 0) primary = 0;
+    const names = $('#sensor-mag').data('setting-info')?.table?.values || [];
+    let number = 2;
+    sources.forEach((source, index) => {
+        if (index === primary) return;
+        const id = 'multi-mag-' + number;
+        const endpoint = `I2C${source.bus} / 0x${source.address.toString(16).toUpperCase().padStart(2, '0')}`;
+        const $row = $('<div class="number multi-sensor-field"></div>');
+        $('<input type="text" readonly class="disabled">').attr({ id, title: endpoint })
+            .val(names[source.hardware] || `#${source.hardware}`).appendTo($row);
+        $('<label>').attr('for', id).text(i18n.getMessage('sensorMagnetometerNumber', [number++])).appendTo($row);
+        $container.append($row);
+    });
+}
+
 function updateMultiSensorFields() {
     const info = FC.SENSOR_CONFIG.multiSensors;
     for (const [selectId, fieldIds, enabled, hardware, primaryIndex] of [
@@ -109,6 +134,8 @@ function updateMultiSensorFields() {
 }
 
 configurationTab.initialize = function (callback, scrollPosition) {
+    const epoch = ++configurationEpoch;
+    configurationMagInventory = null;
 
     if (GUI.active_tab !== this) {
         GUI.active_tab = this;
@@ -430,9 +457,20 @@ configurationTab.initialize = function (callback, scrollPosition) {
 
         // Wait for settings to load before triggering change event
         settingsPromise.then(function() {
+            if (epoch !== configurationEpoch) return;
             $i2cSpeed.trigger('change');
             $('#sensor-acc, #sensor-baro, #multi-imu-enabled, #multi-baro-enabled').on('change', updateMultiSensorFields);
             updateMultiSensorFields();
+            $('#sensor-mag, #multi-mag-enabled').on('change', updateMultiMagFields);
+            updateMultiMagFields();
+            const inventory = FC.SENSOR_CONFIG.multiSensors;
+            if (inventory?.magSupported && inventory.magEnabled) {
+                readMultiMagTelemetry(MSP).then(snapshot => {
+                    if (epoch !== configurationEpoch) return;
+                    configurationMagInventory = snapshot;
+                    updateMultiMagFields();
+                });
+            }
             $('#vbat_meter_type, #current_meter_type').on('change', updateIna226SettingsVisibility);
             updateIna226SettingsVisibility();
             updateMztcSettingsVisibility();
@@ -488,6 +526,8 @@ configurationTab.initialize = function (callback, scrollPosition) {
 };
 
 configurationTab.cleanup = function (callback) {
+    configurationEpoch++;
+    configurationMagInventory = null;
     interval.remove('config_load_analog');
     interval.remove('config_load_battery2');
     if (callback) callback();

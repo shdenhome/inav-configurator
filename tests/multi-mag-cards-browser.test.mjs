@@ -85,3 +85,35 @@ try{const check=(ok,label)=>{if(!ok)throw new Error(label);};const source={uid:1
         }
     }
 );
+
+
+test('configuration lists additional MAG devices independently of calibration and preserves identical models',
+    { skip: !chrome, timeout: 30000 }, () => {
+    const dir = mkdtempSync(join(tmpdir(), 'inav-config-mag-'));
+    try {
+        const source = readFileSync(join(root, 'tabs/configuration.js'), 'utf8');
+        const node = find(parse(source, { ecmaVersion: 'latest', sourceType: 'module' }), 'updateMultiMagFields');
+        assert.ok(node);
+        const label = JSON.parse(readFileSync(join(root, 'locale/ru/messages.json'), 'utf8')).sensorMagnetometerNumber.message;
+        const script = `let configurationMagInventory;const i18n={getMessage:(key,args)=>${JSON.stringify(label)}.replace('$1',args[0])};${source.slice(node.start,node.end)}
+try {
+const check=(ok,label)=>{if(!ok)throw Error(label);};
+const names=[];names[7]='QMC5883';names[11]='LIS3MDL';$('#sensor-mag').data('setting-info',{table:{values:names}});
+const a={uid:0x010d07,hardware:7,bus:1,address:13},b={uid:0x011e0b,hardware:11,bus:1,address:30};
+configurationMagInventory={sources:[a,b],referenceUid:0};updateMultiMagFields();
+check($('#multi-mag-fields input').length===1,'one additional uncalibrated device');
+check($('#multi-mag-2').val()==='QMC5883','LIS primary leaves QMC');check($('#multi-mag-2').prop('readOnly'),'read-only');
+check($('#multi-mag-2').attr('title')==='I2C1 / 0x0D','endpoint');check($('#multi-mag-fields label').text()==='Магнитометр 2','localized number');
+$('#sensor-mag').val('7');updateMultiMagFields();check($('#multi-mag-2').val()==='LIS3MDL','selected QMC leaves LIS');
+configurationMagInventory.sources.push({...b,uid:0x021e0b,bus:2});$('#sensor-mag').val('11');updateMultiMagFields();
+check($('#multi-mag-fields input').length===2,'same model on second bus retained');check($('#multi-mag-3').val()==='LIS3MDL','duplicate preserved');
+$('#multi-mag-enabled').prop('checked',false);updateMultiMagFields();check($('#multi-mag-fields input').length===0,'disabled clears rows');
+$('#multi-mag-enabled').prop('checked',true);configurationMagInventory=null;updateMultiMagFields();check($('#multi-mag-fields input').length===0,'no invented inventory');
+configurationMagInventory={sources:[a,b]};updateMultiMagFields();document.body.dataset.result='PASS';
+}catch(e){document.body.dataset.result='FAIL '+e.message;}`;
+        const html = '<html><head><link rel="stylesheet" href="'+pathToFileURL(join(root,'src/css/main.css')).href+'"><link rel="stylesheet" href="'+pathToFileURL(join(root,'src/css/tabs/configuration.css')).href+'"></head><body><div class="tab-configuration"><h3>Сенсоры и шины</h3><input id="multi-mag-enabled" type="checkbox" checked><div class="select"><select id="sensor-mag"><option value="7">QMC5883</option><option value="11" selected>LIS3MDL</option></select><label>Магнитометр</label></div><div id="multi-mag-fields"></div></div><script src="'+pathToFileURL(join(root,'node_modules/jquery/dist/jquery.min.js')).href+'"></script><script>'+script+'</script></body></html>';
+        const path = join(dir,'test.html');writeFileSync(path,html);
+        const result=spawnSync(chrome,['--headless','--disable-gpu','--no-first-run','--no-default-browser-check','--user-data-dir='+join(dir,'profile'),'--dump-dom',pathToFileURL(path).href],{encoding:'utf8',timeout:25000,maxBuffer:2*1024*1024});
+        assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/data-result="PASS"/,result.stdout.slice(-1800));
+    } finally { rmSync(dir,{recursive:true,force:true}); }
+});

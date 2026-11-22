@@ -3492,6 +3492,9 @@
     "sensorAccelerometer": {
         "message": "Accelerometer"
     },
+    "sensorMagnetometerNumber": {
+        "message": "Magnetometer $1"
+    },
     "sensorMagnetometer": {
         "message": "Magnetometer"
     },
