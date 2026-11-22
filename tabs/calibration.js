@@ -319,7 +319,15 @@ calibrationTab.initialize = function (callback) {
             const tracker = createMagCalibrationTracker(baseline.calibrationRunId);
             const content = $('<div><p></p><div class="multi-mag-calibration-status"></div></div>');
             content.find('p').text(i18n.getMessage('multiMagCalInstructions'));
-            multiMagModal = new jBox('Modal', { width: 500, content, closeOnClick: false, closeOnEsc: true, closeButton: true }).open();
+            const resultButtons = $('<div class="modal__buttons"></div>').hide().appendTo(content);
+            const okButton = $('<a href="#" class="modal__button modal__button--main"></a>')
+                .text(i18n.getMessage('OK')).appendTo(resultButtons);
+            const modal = new jBox('Modal', { width: 500, content, closeOnClick: false, closeOnEsc: true, closeButton: true }).open();
+            multiMagModal = modal;
+            okButton.on('click', function (event) {
+                event.preventDefault();
+                modal.close();
+            });
             MSP.send_message(MSPCodes.MSP_MAG_CALIBRATION, false, false, function (response) {
                 if (epoch !== multiMagCalibrationEpoch) return;
                 if (!response) { button.removeClass('disabled'); multiMagModal.close(); GUI.log(i18n.getMessage('multiMagCommunicationError')); return; }
@@ -341,7 +349,8 @@ calibrationTab.initialize = function (callback) {
                         if (progress.done || progress.error) {
                             interval.remove('multi_mag_calibration_poll'); button.removeClass('disabled');
                             content.find('p').first().text(i18n.getMessage(progress.error ? 'multiMagCommunicationError' : 'multiMagCalFinished'));
-                            multiMagModal.options.closeOnClick = true;
+                            modal.options.closeOnClick = true;
+                            resultButtons.show();
                             MSP.send_message(MSPCodes.MSP_CALIBRATION_DATA, false, false, updateSensorData);
                         }
                     } finally { busy = false; }
