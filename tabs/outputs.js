@@ -7,6 +7,7 @@ import MSP from './../js/msp';
 import GUI from './../js/gui';
 import FC from './../js/fc';
 import i18n from './../js/localization';
+import { TIMER_PROTOCOL_DEFAULT, TIMER_PROTOCOL_NAMES, effectiveTimerProtocol, summarizeTimerProtocols } from '../js/timerMotorProtocols.js';
 import BitHelper from '../js/bitHelper';
 import Settings from './../js/settings';
 import features from './../js/feature_framework';
@@ -57,6 +58,7 @@ outputsTab.initialize = function (callback) {
         mspHelper.loadServoConfiguration,
         mspHelper.loadOutputMappingExt,
         mspHelper.loadTimerOutputModes,
+        mspHelper.loadTimerMotorProtocols,
         mspHelper.loadRcData,
         mspHelper.loadAdvancedConfig,
         /* Needed to count the ports assigned to Spektrum Smart ESC. Without it
@@ -418,6 +420,7 @@ outputsTab.initialize = function (callback) {
         $escProtocol.on('change', function () {
             FC.ADVANCED_CONFIG.motorPwmProtocol = $(this).val();
             srxl2UpdateVisibility();
+            renderTimerProtocolSummary();
         });
 
         $idlePercent.on('change', handleIdleMessageBox);
@@ -441,6 +444,7 @@ outputsTab.initialize = function (callback) {
         }
 
         $("#esc-protocols").show();
+        renderTimerProtocolSummary();
         srxl2UpdateVisibility();
         /* Asked once: both counts are settled at startup and cannot change without
          * a reboot. Refreshes the block when the answer arrives. */
@@ -692,7 +696,7 @@ outputsTab.initialize = function (callback) {
                         done();
                     }
                 });
-                saveChainer.execute();
+                mspHelper.sendTimerMotorProtocols(() => saveChainer.execute(), done);
             },
         });
         self.cleanupServoControls = () => {
@@ -1049,7 +1053,37 @@ outputsTab.initialize = function (callback) {
         GUI.content_ready(callback);
     }
 
+    function renderTimerProtocolSummary() {
+        const records = FC.TIMER_MOTOR_PROTOCOLS;
+        if (!records || !FC.TIMER_PROTOCOL_CAPABILITIES) return;
+        const isMR = [PLATFORM.MULTIROTOR, PLATFORM.TRICOPTER].includes(FC.MIXER_CONFIG.platformType);
+        const map = FC.OUTPUT_MAPPING.hasDirectAssignment() ? FC.OUTPUT_MAPPING.getOutputTableDirect()
+            : FC.OUTPUT_MAPPING.getOutputTable(isMR, FC.MOTOR_RULES.getNumberOfConfiguredMotors(), FC.SERVO_RULES.getUsedServoIndexes());
+        const motorTimers = new Set(FC.OUTPUT_MAPPING.getUsedTimerIds()
+            .filter(timer => FC.OUTPUT_MAPPING.getTimerOverride(timer) === FC.OUTPUT_MAPPING.TIMER_OUTPUT_MODE_MOTORS)
+            .map(Number));
+        const $list = $('#timer-motor-protocol-list').empty();
+        map.forEach((label, index) => {
+            if (!/^Motor \d+$/.test(label)) return;
+            const timer = FC.OUTPUT_MAPPING.getTimerId(index);
+            motorTimers.add(timer);
+            const protocol = effectiveTimerProtocol(records.find(r => r.timer === timer), FC.ADVANCED_CONFIG.motorPwmProtocol);
+            $list.append($('<li></li>').text(label + ' · S' + (index + 1) + ' · Timer ' + (timer + 1) + ' · ' + TIMER_PROTOCOL_NAMES[protocol]));
+        });
+        const summary = summarizeTimerProtocols(records, FC.ADVANCED_CONFIG.motorPwmProtocol, motorTimers);
+        const overrides = records.some(r => r.configured !== TIMER_PROTOCOL_DEFAULT);
+        $('#esc-protocols').toggle(!summary.mixed);
+        $('#timer-protocol-summary').toggle(overrides || summary.mixed);
+        $('#timer-protocol-mode').text(summary.mixed ? 'MIXED' : (TIMER_PROTOCOL_NAMES[summary.protocols[0]] || ''));
+        $('#timer-protocol-reset').off('click.timerProtocols').on('click.timerProtocols', function (event) {
+            event.preventDefault();
+            records.forEach(r => { r.configured = TIMER_PROTOCOL_DEFAULT; });
+            renderTimerProtocolSummary();
+        });
+    }
+
     function labelMotorNumbers() {
+        renderTimerProtocolSummary();
         const $preview = $('.mixerPreview');
         $preview.find('.motorNumber').remove();
         const preset = mixer.getById(FC.MIXER_CONFIG.appliedMixerPreset);

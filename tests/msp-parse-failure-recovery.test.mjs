@@ -142,6 +142,7 @@ const inertGeozoneUrl = dataModule(`
 `);
 
 const realMspHelperUrl = rewriteAndWrite('js/msp/MSPHelper.js', [
+    [/^import \{ parseTimerProtocols, encodeTimerProtocols \} from '\.\.\/timerMotorProtocols\.js';$/m, `import { parseTimerProtocols, encodeTimerProtocols } from '${pathToFileURL(join(repoRoot, 'js/timerMotorProtocols.js')).href}';`, 'timer protocol parser'],
     [/^import \{ parseMultiMagPage \} from '\.\.\/multiMagTelemetry\.js';$/m, `import { parseMultiMagPage } from '${pathToFileURL(join(repoRoot, 'js/multiMagTelemetry.js')).href}';`, 'multi sensor telemetry parser'],
     [/^import \{ parseMultiSensorTelemetry \} from '\.\.\/multiSensorTelemetry\.js';$/m, `import { parseMultiSensorTelemetry } from '${pathToFileURL(join(repoRoot, 'js/multiSensorTelemetry.js')).href}';`, 'multi sensor telemetry parser'],
     [/^import \{ parseMultiSensorInfo \} from '\.\.\/multiSensorInfo\.js';$/m, `import { parseMultiSensorInfo } from '${pathToFileURL(join(repoRoot, 'js/multiSensorInfo.js')).href}';`, 'multi sensor parser'],

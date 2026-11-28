@@ -8173,5 +8173,11 @@
     },
     "batteryCalibrationUnconfirmed": {
         "message": "The RAM write result is unknown. Reconnect to the controller and read the settings again before calibrating or saving."
-    }
+    },
+    "timerProtocolTitle": {"message": "ESC protocol"},
+    "timerProtocolDefault": {"message": "DEFAULT"},
+    "timerProtocolUnavailable": {"message": "Unavailable"},
+    "timerProtocolHint": {"message": "Configured protocols take effect after Save and Reboot. Individual protocols are set in Mixer. Available choices describe timer capabilities; combined DMA/resource conflicts are checked by the firmware. V1 supports STANDARD with one DShot speed and does not support mixed reversible motors."},
+    "timerProtocolReset": {"message": "Use the global protocol for all groups"},
+    "timerProtocolSaveFailed": {"message": "Timer protocols were not accepted. Check motor protocols, reversible mode and timer/DMA resources. Settings were not saved to EEPROM."}
 }

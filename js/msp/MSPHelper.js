@@ -11,6 +11,7 @@ import FC from './../fc';
 import { parseMultiMagPage } from '../multiMagTelemetry.js';
 import { parseMultiSensorInfo } from '../multiSensorInfo.js';
 import { parseMultiSensorTelemetry } from '../multiSensorTelemetry.js';
+import { parseTimerProtocols, encodeTimerProtocols } from '../timerMotorProtocols.js';
 import VTX from './../vtx';
 import mspQueue from './../serial_queue';
 
@@ -133,6 +134,14 @@ var mspHelper = (function () {
             colorCount,
             color;
         if (!dataHandler.unsupported || dataHandler.unsupported) switch (dataHandler.code) {
+            case MSPCodes.MSP2_INAV_TIMER_MOTOR_PROTOCOLS:
+                FC.TIMER_MOTOR_PROTOCOLS = dataHandler.unsupported ? null : parseTimerProtocols(data);
+                break;
+            case MSPCodes.MSP2_INAV_TIMER_PROTOCOL_CAPABILITIES:
+                FC.TIMER_PROTOCOL_CAPABILITIES = dataHandler.unsupported ? null : parseTimerProtocols(data, true);
+                break;
+            case MSPCodes.MSP2_INAV_SET_TIMER_MOTOR_PROTOCOLS:
+                break;
             case MSPCodes.MSPV2_INAV_STATUS:
                 let profile_changed = 0;
                 FC.CONFIG.cycleTime = data.getUint16(offset, true);
@@ -3371,6 +3380,27 @@ var mspHelper = (function () {
 
     self.loadOutputMappingExt = function (callback) {
         MSP.send_message(MSPCodes.MSPV2_INAV_OUTPUT_MAPPING_EXT2, false, false, callback);
+    };
+
+    self.loadTimerMotorProtocols = function(callback) {
+        FC.TIMER_MOTOR_PROTOCOLS = null;
+        FC.TIMER_PROTOCOL_CAPABILITIES = null;
+        MSP.send_message(MSPCodes.MSP2_INAV_TIMER_MOTOR_PROTOCOLS, false, false, function () {
+            if (!FC.TIMER_MOTOR_PROTOCOLS) return callback();
+            MSP.send_message(MSPCodes.MSP2_INAV_TIMER_PROTOCOL_CAPABILITIES, false, false, callback);
+        });
+    };
+
+    self.sendTimerMotorProtocols = function(callback, onError) {
+        const fail = () => { GUI.log(i18n.getMessage('timerProtocolSaveFailed')); onError?.(); };
+        if (!FC.TIMER_MOTOR_PROTOCOLS || !FC.TIMER_PROTOCOL_CAPABILITIES) return callback();
+        let payload;
+        try { payload = encodeTimerProtocols(FC.TIMER_MOTOR_PROTOCOLS); }
+        catch { fail(); return; }
+        MSP.send_message(MSPCodes.MSP2_INAV_SET_TIMER_MOTOR_PROTOCOLS, payload, false, function (response) {
+            if (response?.data?.byteLength === 2 && response.data.getUint8(0) === 1 && response.data.getUint8(1) === 0) callback();
+            else fail();
+        });
     };
 
     self.loadTimerOutputModes = function(callback) {

@@ -35,8 +35,9 @@ test('Outputs browser: wheel, centering, Live MSP batches, EEPROM save/reboot an
         const settings = extract(source, node => node.type === 'FunctionDeclaration' && node.id?.name === 'saveSettings');
         const chain = extract(source, node => node.type === 'ExpressionStatement' && node.expression?.callee?.object?.name === 'saveChainer' && node.expression?.callee?.property?.name === 'setChain');
         const helper = readFileSync(join(root, 'js/msp/MSPHelper.js'), 'utf8');
-        const assignments = ['sendServoConfigurations', 'saveToEeprom', 'saveAdvancedConfig', 'saveMiscV2', 'save3dConfig'].map(name =>
+        const assignments = ['sendTimerMotorProtocols', 'sendServoConfigurations', 'saveToEeprom', 'saveAdvancedConfig', 'saveMiscV2', 'save3dConfig'].map(name =>
             extract(helper, node => node.type === 'AssignmentExpression' && node.left?.object?.name === 'self' && node.left?.property?.name === name).replace(/^self\./, 'mspHelper.') + ';').join('\n');
+        const protocols = readFileSync(join(root, 'js/timerMotorProtocols.js'), 'utf8').replace(/^export /gm, '');
         const controls = readFileSync(join(root, 'js/servoOutputControls.js'), 'utf8').replace(/^export /gm, '');
         const chainer = readFileSync(join(root, 'js/msp/MSPchainer.js'), 'utf8').replace('export default MSPChainerClass;', '');
         const timeouts = readFileSync(join(root, 'js/timeouts.js'), 'utf8').replace('export default timeout;', '');
@@ -49,9 +50,9 @@ test('Outputs browser: wheel, centering, Live MSP batches, EEPROM save/reboot an
         const body = '<div class="tab-motors"><div id="servoEmptyTableInfo"></div>' + template.slice(tableStart, tableEnd) + template.slice(toolbarStart, template.lastIndexOf('\n</div>')) + '</div>';
         const messages = Object.fromEntries(Object.entries(JSON.parse(readFileSync(join(root, 'locale/ru/messages.json'), 'utf8'))).map(([key, value]) => [key, value.message]));
         const script = `
-${controls}\n${chainer}\n${timeouts}\n${bits}
+${protocols}\n${controls}\n${chainer}\n${timeouts}\n${bits}
 const MSPCodes=${JSON.stringify(MSPCodes)}, messages=${JSON.stringify(messages)};
-const self={}, sent=[], checkpoints=[];let persisted=null, holdServoAck=false, held=null, rebootCount=0, settingsWrites=0;
+const self={}, sent=[], checkpoints=[];let persisted=null, holdServoAck=false, held=null, rebootCount=0, settingsWrites=0,rejectProtocol=false;
 const original=[{min:1000,middle:1540,max:2000,rate:100},{min:500,middle:600,max:2500,rate:-80}];
 const FC={SERVO_CONFIG:structuredClone(original),SERVO_RULES:{getServoCount:()=>2,isServoConfigured:()=>true},MIN_SERVO_RATE:-125,MAX_SERVO_RATE:125,MIXER_CONFIG:{platformType:1},OUTPUT_MAPPING:{getMrServoOutput:i=>i+1,getFwServoOutput:i=>i+1},REVERSIBLE_MOTORS:{},MOTOR_RULES:{cleanup(){}}};
 const PLATFORM={MULTIROTOR:0,TRICOPTER:2};
@@ -59,7 +60,7 @@ const i18n={getMessage:key=>messages[key]||key};
 const GUI={log(){},tab_switch_cleanup(done){self.cleanupServoControls?.();done();},handleReconnect(){rebootCount++;}};
 const Settings={saveInputs(done){settingsWrites++;done();}};
 const features={reset(){},fromUI(){},execute(done){done();}};
-const MSP={send_message(code,buffer,unused,done){sent.push({code,data:buffer===false?null:[...buffer]});if(code===MSPCodes.MSP_EEPROM_WRITE)persisted=structuredClone(FC.SERVO_CONFIG);if(code===MSPCodes.MSP2_INAV_SET_SERVO_CONFIG&&holdServoAck){held=done;return;}queueMicrotask(()=>done?.({data:new DataView(new ArrayBuffer(0))}));}};
+const MSP={send_message(code,buffer,unused,done){sent.push({code,data:buffer===false?null:[...buffer]});if(code===MSPCodes.MSP_EEPROM_WRITE)persisted=structuredClone(FC.SERVO_CONFIG);if(code===MSPCodes.MSP2_INAV_SET_SERVO_CONFIG&&holdServoAck){held=done;return;}queueMicrotask(()=>done?.({data:code===MSPCodes.MSP2_INAV_SET_TIMER_MOTOR_PROTOCOLS?new DataView(Uint8Array.from(rejectProtocol?[1,1]:[1,0]).buffer):new DataView(new ArrayBuffer(0))}));}};
 const mspHelper={crunch:()=>[]};
 ${assignments}
 const saveChainer=new MSPChainerClass();
@@ -107,6 +108,12 @@ const u16=(data,offset)=>data[offset]|data[offset+1]<<8;
  check(value(0,'min')===saved[0].min&&value(0,'middle')===saved[0].middle&&value(0,'max')===saved[0].max,'reloading saved data restores Min/Mid/Max');check($('.rate-input').eq(1).val()==='80'&&$('.reverse-input').eq(1).prop('checked'),'rate and reverse survive save/reload');
  sent.length=0;change(0,'middle',1560);$('a.save').trigger('click');await wait();check(eepromFrames().length===1&&sent.filter(f=>f.code===MSPCodes.MSP_SET_REBOOT).length===1&&rebootCount===1,'Save and Reboot persists once then reboots');
  $('.tab-motors').remove();$('body').append(${JSON.stringify(body)});process_servos();live(true);sent.length=0;wheel(0,'middle',-120);self.cleanupServoControls();await wait();check(sent.length===0,'tab cleanup cancels pending live writes');
+ FC.TIMER_MOTOR_PROTOCOLS=[{timer:0,configured:5,effective:5}];FC.TIMER_PROTOCOL_CAPABILITIES=[{timer:0,mask:113}];
+ $('.tab-motors').remove();$('body').append(${JSON.stringify(body)});process_servos();live(false);sent.length=0;rejectProtocol=true;
+ $('a.update').trigger('click');await wait();check(eepromFrames().length===0,'rejected timer protocol blocks EEPROM');
+ rejectProtocol=false;FC.TIMER_MOTOR_PROTOCOLS[0].configured=0;sent.length=0;$('a.update').trigger('click');await wait();check(eepromFrames().length===1,'corrected timer protocol can retry Save after rejection');
+ check(sent.filter(f=>f.code===MSPCodes.MSP2_INAV_SET_TIMER_MOTOR_PROTOCOLS).length===1,'retry sends exactly one protocol request before EEPROM');
+ self.cleanupServoControls();
  if(${JSON.stringify(Boolean(process.env.INAV_OUTPUTS_UI_PREVIEW))}){
   $('.tab-motors').remove();$('body').append(${JSON.stringify(body)});FC.SERVO_CONFIG=structuredClone(original);FC.SERVO_CONFIG[1]={min:1000,middle:1500,max:2000,rate:-80};process_servos();
   document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=messages[el.dataset.i18n]||el.dataset.i18n;});

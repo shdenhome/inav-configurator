@@ -296,3 +296,33 @@
     margin-top: 1em;
     text-align: center;
 }
+
+#timer-protocol-row select { max-width: 100%; width: 100%; box-sizing: border-box; }
+#timer-protocol-hint { margin: .7em; }
+
+.output-table.timer-protocol-enabled { table-layout: fixed; }
+.output-table.timer-protocol-enabled select { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.output-table.timer-protocol-enabled td, .output-table.timer-protocol-enabled th { overflow-wrap: anywhere; }
+
+/* Each cell has a rounded outline and a one-pixel white separator. */
+.output-table { border-spacing: 1px; background: #fff; }
+.output-table td, .output-table th { border-radius: .5em; }
+.output-table #output-row td { font-weight: normal; }
+.output-table select {
+    appearance: none;
+    background-color: inherit;
+    background-image: linear-gradient(45deg, transparent 50%, #333 50%), linear-gradient(135deg, #333 50%, transparent 50%);
+    background-position: calc(100% - .65em) 50%, calc(100% - .4em) 50%;
+    background-size: .25em .25em;
+    background-repeat: no-repeat;
+    color: #222;
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-radius: .35em;
+    padding-inline: 1.2em;
+    text-align: center;
+    text-align-last: center;
+}
+.output-table select:focus-visible { outline: 2px solid #333; outline-offset: 1px; }
+.mixer-table tbody tr.timer-mapped-rule > td { background: var(--mixer-timer-color); }
+
+.output-table .timer-group-heading select { display: block; margin: .3em auto; }

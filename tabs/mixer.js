@@ -15,6 +15,7 @@ import ServoMixRule from './../js/servoMixRule';
 import { getServoTargetWarning } from './../js/servoMixerTargetWarning';
 import MotorMixRule from './../js/motorMixRule';
 import { getMotorPreviewLabels } from './../js/motorMixerPreview';
+import { TIMER_PROTOCOL_DEFAULT, TIMER_PROTOCOL_NAMES, effectiveTimerProtocol, summarizeTimerProtocols } from '../js/timerMotorProtocols.js';
 import BitHelper from './../js/bitHelper';
 
 const mixerTab = {};
@@ -40,11 +41,13 @@ mixerTab.initialize = function (callback, scrollPosition) {
 
     loadChainer.setChain([
         mspHelper.loadMixerConfig,
+        mspHelper.loadAdvancedConfig,
         mspHelper.loadMotors,
         mspHelper.loadServoMixRules,
         mspHelper.loadMotorMixRules,
         mspHelper.loadOutputMappingExt,
         mspHelper.loadTimerOutputModes,
+        mspHelper.loadTimerMotorProtocols,
         mspHelper.loadLogicConditions,
         mspHelper.loadEzTune,
     ]);
@@ -57,6 +60,7 @@ mixerTab.initialize = function (callback, scrollPosition) {
         mspHelper.sendMotorMixer,
         mspHelper.sendTimerOutputModes,
         saveSettings,
+        mspHelper.sendTimerMotorProtocols,
         mspHelper.saveToEeprom
     ]);
     saveChainer.setExitPoint(reboot);
@@ -133,7 +137,7 @@ mixerTab.initialize = function (callback, scrollPosition) {
 
         for (const group of groups) {
             const selectHtml = buildTimerSelectHtml(group);
-            $timerRow.append('<td colspan="' + group.count + '" style="background-color: ' + group.color + '; padding-right: 4px">' + selectHtml + '</td>');
+            $timerRow.append('<td class="timer-group-heading" colspan="' + group.count + '" style="background-color: ' + group.color + '; padding-right: 4px">' + selectHtml + '</td>');
         }
 
         for (let i = 1; i <= outputCount; i++) {
@@ -145,6 +149,13 @@ mixerTab.initialize = function (callback, scrollPosition) {
         }
 
         $outputRow.find('td').css('width', 100 / (outputCount + 1) + '%');
+        let groupStart = 0;
+        for (const group of groups) {
+            $outputRow.find('td').eq(groupStart).addClass('timer-group-first');
+            $outputRow.find('td').eq(groupStart + group.count - 1).addClass('timer-group-last');
+            groupStart += group.count;
+        }
+
 
         for (const group of groups) {
             $('#timer-output-' + group.timerId).on('change', function() {
@@ -156,6 +167,37 @@ mixerTab.initialize = function (callback, scrollPosition) {
                 }
             });
         }
+    }
+
+    function renderTimerProtocols() {
+        const records = FC.TIMER_MOTOR_PROTOCOLS, caps = FC.TIMER_PROTOCOL_CAPABILITIES;
+        $('#timer-protocol-row').remove();
+        $('.output-table').toggleClass('timer-protocol-enabled', Boolean(records && caps));
+        if (!records || !caps) return; // old firmware: keep the original screen
+        const $row = $('<tr id="timer-protocol-row"></tr>');
+        $row.append($('<th></th>').text(i18n.getMessage('timerProtocolTitle')));
+        for (const group of buildTimerGroups(FC.OUTPUT_MAPPING.getOutputCount())) {
+            const motorGroup = FC.OUTPUT_MAPPING.getTimerOverride(group.timerId) === FC.OUTPUT_MAPPING.TIMER_OUTPUT_MODE_MOTORS;
+            const $cell = $('<td></td>').attr('colspan', group.count).css('background-color', group.color);
+            const record = records.find(item => item.timer === group.timerId);
+            const capability = caps.find(item => item.timer === group.timerId);
+            if (motorGroup && record && capability) {
+                const $select = $('<select class="timer-motor-protocol"></select>')
+                    .attr('aria-label', i18n.getMessage('timerProtocolTitle') + ' — Timer ' + (group.timerId + 1));
+                $select.append($('<option></option>').val(255).text(i18n.getMessage('timerProtocolDefault') + ' (' + TIMER_PROTOCOL_NAMES[FC.ADVANCED_CONFIG.motorPwmProtocol] + ')'));
+                for (const [id, name] of Object.entries(TIMER_PROTOCOL_NAMES)) {
+                    if (capability.mask & (1 << id)) $select.append($('<option></option>').val(id).text(name));
+                }
+                if (record.configured !== 255 && !(capability.mask & (1 << record.configured))) {
+                    $select.append($('<option disabled></option>').val(record.configured).text(TIMER_PROTOCOL_NAMES[record.configured] + ' — ' + i18n.getMessage('timerProtocolUnavailable')));
+                }
+                $select.val(record.configured).on('change', function () { record.configured = Number(this.value); });
+                $cell.append($select);
+            } else $cell.text('—');
+            $row.append($cell);
+        }
+        $('#timer-row').after($row);
+        if (!$('#timer-protocol-hint').length) $('.output-table').after($('<div id="timer-protocol-hint" class="info-box"></div>').text(i18n.getMessage('timerProtocolHint')));
     }
 
     function updateTimerOverride() {
@@ -190,9 +232,38 @@ mixerTab.initialize = function (callback, scrollPosition) {
             $('#function-' + i).html(outputMap[i - 1]);
         }
 
+        renderTimerProtocols(outputMap);
         motorPreviewOutputMap = outputMap;
         labelMotorNumbers();
         renderServoOutputImage(outputMap);
+        renderMixerTimerColors(outputMap);
+    }
+
+    function renderMixerTimerColors(outputMap) {
+        const colors = new Map();
+        outputMap.forEach((label, index) => {
+            if (!/^(Motor|Servo) \d+$/.test(label)) return;
+            const color = FC.OUTPUT_MAPPING.getOutputTimerColor(index);
+            const assigned = colors.get(label) || [];
+            if (!assigned.includes(color)) assigned.push(color);
+            colors.set(label, assigned);
+        });
+        function paint($row, label) {
+            const assigned = colors.get(label) || [];
+            $row.toggleClass('timer-mapped-rule', assigned.length > 0);
+            $row[0].style.removeProperty('--mixer-timer-color');
+            if (assigned.length === 1) $row[0].style.setProperty('--mixer-timer-color', assigned[0]);
+            else if (assigned.length > 1) {
+                const stops = assigned.map((color, i) => color + ' ' + (i * 100 / assigned.length) + '% ' + ((i + 1) * 100 / assigned.length) + '%');
+                $row[0].style.setProperty('--mixer-timer-color', 'linear-gradient(to right, ' + stops.join(', ') + ')');
+            }
+        }
+        $('#motor-mix-table tbody tr').each(function () {
+            paint($(this), 'Motor ' + $(this).find('.mix-rule-motor').text().trim());
+        });
+        $('#servo-mix-table tbody tr').each(function () {
+            paint($(this), 'Servo ' + $(this).find('.mix-rule-servo').val());
+        });
     }
 
     function renderServoOutputImage(outputMap) {
@@ -422,6 +493,7 @@ mixerTab.initialize = function (callback, scrollPosition) {
                     const enteredTarget = Number($(this).val());
 
                     servoRule.setTarget(enteredTarget);
+                    FC.OUTPUT_MAPPING.invalidateDirectAssignment();
 
                     const warning = getServoTargetWarning(FC.SERVO_RULES.get(), enteredTarget);
                     if (warning) {
@@ -1071,7 +1143,10 @@ mixerTab.initialize = function (callback, scrollPosition) {
             renderOutputMapping();
         });
 
-        $motorMixTableBody.on('change', "input", labelMotorNumbers);
+        $motorMixTableBody.on('change', "input", function () {
+            FC.OUTPUT_MAPPING.invalidateDirectAssignment();
+            renderOutputMapping();
+        });
 
         $servoMixTableBody.on('change', "input", function (event) {
             renderOutputMapping();

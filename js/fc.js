@@ -84,6 +84,8 @@ var FC = {
     MIXER_CONFIG: null,
     BATTERY_CONFIG: null,
     OUTPUT_MAPPING: null,
+    TIMER_MOTOR_PROTOCOLS: null,
+    TIMER_PROTOCOL_CAPABILITIES: null,
     BRAKING_CONFIG: null,
     SAFEHOMES: null,
     BOARD_ALIGNMENT: null,
@@ -702,6 +704,8 @@ var FC = {
         this.RXFAIL_CONFIG = [];
 
         this.OUTPUT_MAPPING = new OutputMappingCollection();
+        this.TIMER_MOTOR_PROTOCOLS = null;
+        this.TIMER_PROTOCOL_CAPABILITIES = null;
 
         this.SAFEHOMES = new SafehomeCollection();
 

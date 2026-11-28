@@ -94,6 +94,7 @@ const realSerialPortHelperUrl = rewriteImports('js/serialPortHelper.js', [
 // MSP and mspQueue are only touched from self.init() and the send helpers,
 // which these tests never call.
 const realMspHelperUrl = rewriteImports('js/msp/MSPHelper.js', [
+    ["import { parseTimerProtocols, encodeTimerProtocols } from '../timerMotorProtocols.js';", `import { parseTimerProtocols, encodeTimerProtocols } from '${pathToFileURL(join(repoRoot, 'js/timerMotorProtocols.js')).href}';`],
     ["import { parseMultiMagPage } from '../multiMagTelemetry.js';", `import { parseMultiMagPage } from '${pathToFileURL(join(repoRoot, 'js/multiMagTelemetry.js')).href}';`],
     ["import { parseMultiSensorTelemetry } from '../multiSensorTelemetry.js';", `import { parseMultiSensorTelemetry } from '${pathToFileURL(join(repoRoot, 'js/multiSensorTelemetry.js')).href}';`],
     ["import { parseMultiSensorInfo } from '../multiSensorInfo.js';", `import { parseMultiSensorInfo } from '${pathToFileURL(join(repoRoot, 'js/multiSensorInfo.js')).href}';`],
