@@ -324,4 +324,19 @@ hr {
 .battery-calibration-dialog dl { margin: 0 0 1em; }
 .battery-calibration-dialog dd { margin: .25em 0 .75em; }
 .battery-calibration-dialog label { display: block; }
-.battery-calibration-dialog label input { display: block; margin-top: .5em; }
+.battery-calibration-dialog label input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: .5em;
+    padding: .5em .6em;
+    border: 1px solid #8c8c8c;
+    border-radius: .25em;
+    background: #fff;
+    color: #333;
+}
+.battery-calibration-dialog label input:focus {
+    border-color: #37a8db;
+    outline: .15em solid rgba(55, 168, 219, .25);
+    outline-offset: .1em;
+}
