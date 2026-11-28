@@ -126,11 +126,13 @@
                         <div for="voltagesource" class="helpicon cf_tip" data-i18n_title="configurationVoltageSourceHelp"></div>
                     </div>
                     
-                    <div class="number adc-voltage-setting">
-                        <input type="number" id="voltagescale" name="voltagescale" step="1" min="10" max="65535" />
+                    <div class="number battery-calibration-setting adc-voltage-setting">
+                        <input type="number" id="voltagescale" name="voltagescale" step="1" min="1" max="65535" />
                         <label for="voltagescale">
                             <span data-i18n="configurationBatteryScale"></span>
                         </label>
+                        <div for="voltagescale" class="helpicon cf_tip" data-i18n_title="batteryCalibrationVoltage1Tip"></div>
+                        <button type="button" class="modal__button modal__button--main battery-calibration-open" data-battery-calibration="voltage1" data-i18n="batteryCalibrationButton" disabled>Calibration</button>
                     </div>
                     <div class="number">
                         <input type="text" id="batteryvoltage" name="batteryvoltage" readonly class="disabled" />
@@ -166,12 +168,13 @@
                         </label>
                         <div for="ina_shunt_res_uohm" class="helpicon cf_tip" data-i18n_title="configurationIna226ShuntResistanceHelp"></div>
                     </div>
-                    <div class="number adc-current-setting">
+                    <div class="number battery-calibration-setting adc-current-setting">
                         <input type="number" id="currentscale" name="currentscale" step="1" min="-10000" max="10000" data-setting-placeholder="current_meter_scale" />
                         <label for="currentscale">
                             <span data-i18n="configurationCurrentScale"></span>
                         </label>
                         <div for="currentscale" class="helpicon cf_tip" data-i18n_title="configurationCurrentScaleHelp"></div>
+                        <button type="button" class="modal__button modal__button--main battery-calibration-open" data-battery-calibration="current1" data-i18n="batteryCalibrationButton" disabled>Calibration</button>
                     </div>
                     <div class="number adc-current-setting">
                         <input type="number" id="currentoffset" name="currentoffset" step="0.1" min="-3276.8" max="3276.7" />
@@ -340,9 +343,11 @@
                         </select>
                         <label for="battery2-voltage-sensor"><span data-i18n="battery2VoltageSensor"></span></label>
                     </div>
-                    <div class="number">
+                    <div class="number battery-calibration-setting">
                         <input type="number" id="battery2-voltage-scale" step="1" min="1" max="65535" />
                         <label for="battery2-voltage-scale"><span data-i18n="configurationBatteryScale"></span></label>
+                        <div for="battery2-voltage-scale" class="helpicon cf_tip" data-i18n_title="batteryCalibrationVoltage2Tip"></div>
+                        <button type="button" class="modal__button modal__button--main battery-calibration-open" data-battery-calibration="voltage2" data-i18n="batteryCalibrationButton" disabled>Calibration</button>
                     </div>
                     <div class="number">
                         <input type="number" id="battery2-voltage-offset" step="0.01" min="-327.68" max="327.67" />
@@ -369,9 +374,11 @@
                         <label for="battery2-current-i2c-address"><span data-i18n="battery2CurrentI2cAddress"></span></label>
                         <div for="battery2-current-i2c-address" class="helpicon cf_tip" data-i18n_title="battery2CurrentI2cAddressHelp"></div>
                     </div>
-                    <div class="number">
+                    <div class="number battery-calibration-setting">
                         <input type="number" id="battery2-current-scale" step="1" min="1" max="65535" />
                         <label for="battery2-current-scale"><span data-i18n="configurationCurrentScale"></span></label>
+                        <div for="battery2-current-scale" class="helpicon cf_tip" data-i18n_title="batteryCalibrationCurrent2Tip"></div>
+                        <button type="button" class="modal__button modal__button--main battery-calibration-open" data-battery-calibration="current2" data-i18n="batteryCalibrationButton" disabled>Calibration</button>
                     </div>
                     <div class="number">
                         <input type="number" id="battery2-current-offset" step="1" min="-32768" max="32767" />

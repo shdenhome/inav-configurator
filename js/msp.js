@@ -134,6 +134,7 @@ var MSP = {
 
     last_received_timestamp:   null,
     analog_last_received_timestamp: null,
+    connectionGeneration: 0,
 
     lastFrameReceivedMs: 0,
 
@@ -544,6 +545,7 @@ var MSP = {
         this.callbacks = [];
     },
     disconnect_cleanup() {
+        this.connectionGeneration++;
         this.state = 0; // reset packet state for "clean" initial entry (this is only required if user hot-disconnects)
         this.packet_error = 0; // reset CRC packet error counter for next session
         this.last_received_timestamp = null;

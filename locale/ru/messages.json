@@ -7062,5 +7062,83 @@
     },
     "multiMagCalMissing": {
         "message": "Датчик недоступен при калибровке"
+    },
+    "batteryCalibrationButton": {
+        "message": "Калибровка"
+    },
+    "batteryCalibrationTitleVoltage": {
+        "message": "Калибровка напряжения батареи $1"
+    },
+    "batteryCalibrationTitleCurrent": {
+        "message": "Калибровка тока батареи $1"
+    },
+    "batteryCalibrationMeasured": {
+        "message": "Показание INAV"
+    },
+    "batteryCalibrationCurrentScale": {
+        "message": "Текущий масштаб"
+    },
+    "batteryCalibrationReference": {
+        "message": "Фактическое значение ($1)"
+    },
+    "batteryCalibrationPromptV": {
+        "message": "Напряжение по мультиметру, В"
+    },
+    "batteryCalibrationPromptA": {
+        "message": "Ток по эталонному измерителю, А"
+    },
+    "batteryCalibrationRecalculate": {
+        "message": "Пересчитать"
+    },
+    "batteryCalibrationCancel": {
+        "message": "Закрыть"
+    },
+    "batteryCalibrationSaveHint": {
+        "message": "Изменение применяется в RAM контроллера. Для постоянного сохранения используйте основную кнопку «Сохранить»."
+    },
+    "batteryCalibrationSuccess": {
+        "message": "Масштаб изменён. Выше показаны новые фактические показания INAV. Сохраните настройки основной кнопкой."
+    },
+    "batteryCalibrationUnchanged": {
+        "message": "Масштаб не изменился после округления. Показания INAV обновлены."
+    },
+    "batteryCalibrationInvalidInput": {
+        "message": "Введите положительное число с точкой или запятой в качестве десятичного разделителя."
+    },
+    "batteryCalibrationNoSample": {
+        "message": "Нет пригодного свежего измерения для калибровки."
+    },
+    "batteryCalibrationUnsupported": {
+        "message": "Выбранный источник не поддерживает такую калибровку."
+    },
+    "batteryCalibrationUnsaved": {
+        "message": "Сначала сохраните изменения настроек датчика, затем откройте калибровку снова."
+    },
+    "batteryCalibrationRange": {
+        "message": "Рассчитанный масштаб выходит за допустимые пределы прошивки."
+    },
+    "batteryCalibrationCommunication": {
+        "message": "Не удалось получить подтверждённые данные контроллера. Проверьте соединение."
+    },
+    "batteryCalibrationSettling": {
+        "message": "Показания ещё не установились. Дождитесь стабильного значения и повторите."
+    },
+    "batteryCalibrationVoltage1Tip": {
+        "message": "Калибровка масштаба напряжения основной батареи по фактическому измерению."
+    },
+    "batteryCalibrationCurrent1Tip": {
+        "message": "Калибровка масштаба тока основной батареи по фактическому измерению."
+    },
+    "batteryCalibrationVoltage2Tip": {
+        "message": "Калибровка масштаба напряжения второй батареи по фактическому измерению."
+    },
+    "batteryCalibrationCurrent2Tip": {
+        "message": "Калибровка масштаба тока второй батареи по фактическому измерению."
+    },
+    "batteryCalibrationAppliedNoSample": {
+        "message": "Масштаб применён в RAM. Ожидаются свежие показания датчика. Для сохранения используйте основную кнопку «Сохранить»."
+    },
+    "batteryCalibrationUnconfirmed": {
+        "message": "Результат записи в RAM неизвестен. Переподключитесь к контроллеру и прочитайте настройки заново перед повторной калибровкой или сохранением."
     }
 }

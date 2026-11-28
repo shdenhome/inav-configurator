@@ -699,7 +699,9 @@ test('reconnecting clears the block', () => {
 
     // What serial_backend.js does at the start of every session, right after
     // FC.resetState() - everything gets re-read from the FC from scratch.
+    const previousGeneration = MSP.connectionGeneration;
     MSP.disconnect_cleanup();
+    assert.equal(MSP.connectionGeneration, previousGeneration + 1, 'reconnect creates a new calibration session even when transport ID is reused');
     assert.equal(MSP.parseFailures.size, 0);
 
     resetQueue();

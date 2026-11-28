@@ -10,6 +10,9 @@ import interval from './../js/intervals';
 import VTX from './../js/vtx';
 import i18n from './../js/localization';
 import Settings from './../js/settings';
+import jBox from 'jbox';
+import { installBatteryCalibration } from '../js/batteryCalibrationMsp.js';
+import { openBatteryCalibrationDialog } from '../js/batteryCalibrationDialog.js';
 import features from './../js/feature_framework';
 import { remainingSensorNames } from '../js/multiSensorInfo.js';
 import { readMultiMagTelemetry } from '../js/multiMagTelemetry.js';
@@ -17,6 +20,7 @@ import { readMultiMagTelemetry } from '../js/multiMagTelemetry.js';
 const configurationTab = {};
 let configurationEpoch = 0;
 let configurationMagInventory = null;
+let batteryCalibrationUi = null;
 
 function isIna226Selected($meterType) {
     const settingInfo = $meterType.data('setting-info');
@@ -475,11 +479,17 @@ configurationTab.initialize = function (callback, scrollPosition) {
             updateIna226SettingsVisibility();
             updateMztcSettingsVisibility();
             bindMztcPresetSelector();
+            batteryCalibrationUi = installBatteryCalibration({ $, MSP, codes: MSPCodes, helper: mspHelper, FC, i18n,
+                isActive: () => epoch === configurationEpoch,
+                sessionToken: () => MSP.connectionGeneration,
+                openDialog: options => openBatteryCalibrationDialog({ $, jBox, i18n, ...options }),
+            });
         }).catch(function(error) {
             console.error('Settings load failed, dependent controls not initialized:', error);
         });
 
         $('a.save').on('click', function () {
+            if (batteryCalibrationUi?.busy()) { GUI.log(i18n.getMessage(batteryCalibrationUi.requiresReconnect() ? 'batteryCalibrationUnconfirmed' : 'batteryCalibrationSettling')); return; }
             //UPDATE: moved to GPS tab and hidden
             //FC.MISC.mag_declination = parseFloat($('#mag_declination').val());
 
@@ -526,6 +536,8 @@ configurationTab.initialize = function (callback, scrollPosition) {
 };
 
 configurationTab.cleanup = function (callback) {
+    batteryCalibrationUi?.destroy();
+    batteryCalibrationUi = null;
     configurationEpoch++;
     configurationMagInventory = null;
     interval.remove('config_load_analog');

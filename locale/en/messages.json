@@ -215,7 +215,6 @@
     "dronecanColNodeID": {
         "message": "Node ID"
     },
-
     "dronecanNodesTitle": {
         "message": "DroneCAN Nodes"
     },
@@ -8096,5 +8095,83 @@
     },
     "multiMagCalMissing": {
         "message": "Source unavailable during calibration"
+    },
+    "batteryCalibrationButton": {
+        "message": "Calibrate"
+    },
+    "batteryCalibrationTitleVoltage": {
+        "message": "Battery $1 voltage calibration"
+    },
+    "batteryCalibrationTitleCurrent": {
+        "message": "Battery $1 current calibration"
+    },
+    "batteryCalibrationMeasured": {
+        "message": "INAV reading"
+    },
+    "batteryCalibrationCurrentScale": {
+        "message": "Current scale"
+    },
+    "batteryCalibrationReference": {
+        "message": "Actual value ($1)"
+    },
+    "batteryCalibrationPromptV": {
+        "message": "Multimeter voltage, V"
+    },
+    "batteryCalibrationPromptA": {
+        "message": "Reference meter current, A"
+    },
+    "batteryCalibrationRecalculate": {
+        "message": "Recalculate"
+    },
+    "batteryCalibrationCancel": {
+        "message": "Close"
+    },
+    "batteryCalibrationSaveHint": {
+        "message": "The change applies in controller RAM. Use the main Save button to store it permanently."
+    },
+    "batteryCalibrationSuccess": {
+        "message": "Scale updated. Actual new INAV readings are shown above. Use the main Save button to store settings."
+    },
+    "batteryCalibrationUnchanged": {
+        "message": "Rounding left the scale unchanged. INAV readings were refreshed."
+    },
+    "batteryCalibrationInvalidInput": {
+        "message": "Enter a positive number using a period or comma as decimal separator."
+    },
+    "batteryCalibrationNoSample": {
+        "message": "No valid fresh measurement is available for calibration."
+    },
+    "batteryCalibrationUnsupported": {
+        "message": "The selected source does not support this calibration."
+    },
+    "batteryCalibrationUnsaved": {
+        "message": "Save pending sensor setting changes before opening calibration again."
+    },
+    "batteryCalibrationRange": {
+        "message": "The calculated scale exceeds the firmware limits."
+    },
+    "batteryCalibrationCommunication": {
+        "message": "Could not obtain confirmed controller data. Check the connection."
+    },
+    "batteryCalibrationSettling": {
+        "message": "Readings have not settled. Wait for a stable value and retry."
+    },
+    "batteryCalibrationVoltage1Tip": {
+        "message": "Calibrate primary battery voltage scale against a reference measurement."
+    },
+    "batteryCalibrationCurrent1Tip": {
+        "message": "Calibrate primary battery current scale against a reference measurement."
+    },
+    "batteryCalibrationVoltage2Tip": {
+        "message": "Calibrate second battery voltage scale against a reference measurement."
+    },
+    "batteryCalibrationCurrent2Tip": {
+        "message": "Calibrate second battery current scale against a reference measurement."
+    },
+    "batteryCalibrationAppliedNoSample": {
+        "message": "The scale is applied in RAM. Waiting for fresh sensor readings. Use the main Save button to store it."
+    },
+    "batteryCalibrationUnconfirmed": {
+        "message": "The RAM write result is unknown. Reconnect to the controller and read the settings again before calibrating or saving."
     }
 }
